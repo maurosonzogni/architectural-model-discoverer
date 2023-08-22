@@ -1,0 +1,61 @@
+var dataOutput = new Map;
+
+getSizeModel();
+getLabelsAndCategories();
+getMetrics();
+return dataOutput;
+
+///////////////// OPERATIONS GO HERE //////////////
+operation getSizeModel() {
+	var systemName = ModelImpl!SystemInstance.all().first().name;
+    var components = ModelImpl!ComponentInstance.all().size();
+    var connectors = ModelImpl!ConnectionInstance.all().size();
+    dataOutput.put("sys_name",systemName);
+    dataOutput.put("no_components",components);
+    dataOutput.put("no_connectors",connectors);
+    dataOutput.put("no_size",connectors + components);
+}
+
+operation getLabelsAndCategories() {
+    var hardware_components = 0;
+    var hardwareCategorySequence:Sequence = Sequence{"device","memory","bus","processor"};
+    var softwareCategorySequence:Sequence = Sequence{"process","thread","thread group","threadGroup",
+    "subprogram","subprogram group","subprogramGroup","virtual bus","virtualBus","virtual processor","virtualProcessor"};
+    var counterHardwareDevices = 0;
+    var counterSoftware = 0;
+    var counterData = 0;
+    var counterSystem = 0;
+
+	for(componentEl in ModelImpl!ComponentInstance.all){
+	    var category = componentEl.category.name;
+	    if(hardwareCategorySequence.indexOf(category) > -1){
+	        counterHardwareDevices++;
+	    }
+	    if(softwareCategorySequence.indexOf(category) > -1){
+	        counterSoftware++;
+	    }
+	    if(componentEl.category.name == "data"){
+	        counterData++;
+	    }
+	    if(componentEl.category.name == "system"){
+	        counterSystem++;
+	    }
+	}
+
+	dataOutput.put("no_hardware_comp",counterHardwareDevices);
+    dataOutput.put("no_software_comp",counterSoftware);
+    dataOutput.put("no_data_comp",counterData);
+    dataOutput.put("no_sys_comp",counterSystem);
+}
+
+// Computes **Understandability** //.
+operation getMetrics(){
+    var n:Real = dataOutput.get("no_components").asReal();
+    var c:Real = dataOutput.get("no_connectors").asReal();
+    var udy:Real = 0;
+    if(n > 1){
+        udy = c / (n * (n - 1));
+    }
+    dataOutput.put("understandability",udy);
+}
+//////////////////////////////////////////////////
