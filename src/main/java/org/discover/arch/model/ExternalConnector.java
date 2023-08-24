@@ -10,13 +10,15 @@ public interface ExternalConnector {
     boolean isValidPath(String externalRepoURL);
 
     boolean isReadyForDownload(String path);
+    
     void deleteBeforeLoading(String clonedDirectoryRepo) throws Exception;
 
 }
 
+
 class MetaData {
-    String name = "";
-    String downloadablePath = "";
+    String name;
+    String downloadablePath;
 }
 
 class InvalidURLConnectorException extends Exception {

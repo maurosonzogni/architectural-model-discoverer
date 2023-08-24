@@ -22,7 +22,6 @@ public class ResourcesProviderAnalyzer {
         if (!validationFiles)
             throw new Exception("THERE IS NOT VALID PATH IN THE LIST PROVIDED, PLEASE VERIFY YOUR CONFIGURATION");
         this.configObj.persistCacheInDisk();
-        this.configObj.saveConfig();
     }
 
     private boolean validateFilePaths() {

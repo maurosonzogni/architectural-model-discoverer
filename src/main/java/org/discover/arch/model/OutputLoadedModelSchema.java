@@ -39,16 +39,6 @@ public class OutputLoadedModelSchema {
         }).toList();
     }
 
-    @Override
-    public String toString() {
-        return "modelName: " + this.modelName + "\n" +
-                "isParsingSucceeded: " + this.isParsingSucceeded + "\n" +
-                "isSavedTheModel: " + this.isSavedTheModel + "\n" +
-                "pathAADLFile: " + this.pathAADLFile + "\n" +
-                "pathXMLFile: " + this.pathXMLFile + "\n" +
-                "errors: " + this.errors + "\n";
-    }
-
     public Map<String, Object> toMap() {
         Map<String, Object> data = new HashMap<>();
         List<String> listErrors = this.getErrors(true).stream().map((x) -> {
@@ -70,5 +60,15 @@ public class OutputLoadedModelSchema {
         data.put("pathXMLFile", this.pathXMLFile);
         data.put("errors", listErrors);
         return data;
+    }
+
+    @Override
+    public String toString() {
+        return "modelName: " + this.modelName + "\n" +
+                "isParsingSucceeded: " + this.isParsingSucceeded + "\n" +
+                "isSavedTheModel: " + this.isSavedTheModel + "\n" +
+                "pathAADLFile: " + this.pathAADLFile + "\n" +
+                "pathXMLFile: " + this.pathXMLFile + "\n" +
+                "errors: " + this.errors + "\n";
     }
 }

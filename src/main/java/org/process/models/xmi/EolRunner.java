@@ -51,18 +51,6 @@ public class EolRunner implements QueryModel {
         return this.run("main", modelPath);
     }
 
-    public Object runExample() throws Exception {
-        EolModule module = new EolModule();
-        Path rootPath = Paths.get("", "scripts", "eol");
-        String eolPath = rootPath.resolve("test.eol").toString();
-        String metaModelPath = Paths.get(rootPath.toString(), "example_models", "Tree.ecore").toString();
-        String modelPath = Paths.get(rootPath.toString(), "example_models", "Tree.xmi").toString();
-        EmfModel model = createEmfModel("TreeModel", modelPath, metaModelPath, true, false);
-        module.parse(new File(eolPath));
-        module.getContext().getModelRepository().addModel(model);
-        return module.execute();
-    }
-
     protected EmfModel createEmfModel(String name, String modelUri, String metaModelURI, boolean readOnLoad, boolean storeOnDisposal)
             throws EolModelLoadingException {
         EmfModel emfModel = new EmfModel();

@@ -27,3 +27,12 @@ models/.files-found.txt
 models/results.csv
 models/.cache.txt
 models/github
+
+# aadl
+*.aadl*
+# aaxl
+*.aaxl*
+
+# log file
+
+*.log

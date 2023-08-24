@@ -2,11 +2,14 @@ package org.discover.arch.model;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONTokener;
+
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,10 +17,13 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
-@SuppressWarnings("unchecked")
+@Setter
+@Getter
 public class Config {
-    private final static String configPath = "./config.json";
+    private final static String configPath = "/config.json";
     private String rootPath;
     private String outputFolderName;
     private String ecoreRequiredFilesFolder;
@@ -26,7 +32,6 @@ public class Config {
     private List<String> externalResources;
     private List<String> avoidFileNames;
 
-    public Map<String, Object> configObj;
     private List<Map<String, Object>> conversionLogs;
     private List<String> filesFound;
     private Map<String, Object> reports;
@@ -34,142 +39,96 @@ public class Config {
     public int timeCacheForDiscoveringSearchOverFilesInSeconds;
     public int timeCacheForPollingFromExternalResources;
 
-    public Config() throws Exception {
-        JSONObject config = loadConfig();
-        this.configObj = config.toMap();
-        this.rootPath = (String) this.configObj.get("rootPath");
-        this.outputFolderName = (String) this.configObj.get("outputFolderName");
-        // Unchecked conversion
-        this.archivesForSearching = (List<String>) this.configObj.get("archivesForSearching");
-        this.extensionsForSearching = (List<String>) this.configObj.get("extensionsForSearching");
-        this.externalResources = (List<String>) this.configObj.get("externalResources");
-        this.avoidFileNames = (List<String>) this.configObj.get("avoidFileNames");
+    private SimpleDateFormat formatterDate = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
-        this.ecoreRequiredFilesFolder = (String) this.configObj.get("ecoreRequiredFilesFolder");
-        this.timeCacheForDiscoveringSearchOverFilesInSeconds = (Integer) this.configObj
-                .get("timeCacheForDiscoveringSearchOverFilesInSeconds");
-        this.timeCacheForPollingFromExternalResources = (Integer) this.configObj
-                .get("timeCacheForPollingFromExternalResources");
+    private final static Logger logger = LogManager.getLogger(Config.class);
+
+    public Config() throws Exception {
+
+        logger.debug("Config@config -> Start configuration");
+
+        JSONObject config = readConfigFile();
+
+        // set root path
+        this.rootPath = config.getString("rootPath");
+        // check fot root path
+        this.validateRootPath();
+        // set output folder
+        this.outputFolderName = config.getString("outputFolderName");
+        // set ecore files folder
+        this.ecoreRequiredFilesFolder = config.getString("ecoreRequiredFilesFolder");
+        // set cache for discovering
+        this.timeCacheForDiscoveringSearchOverFilesInSeconds = config
+                .getInt("timeCacheForDiscoveringSearchOverFilesInSeconds");
+        // set cache for polling
+        this.timeCacheForPollingFromExternalResources = config
+                .getInt("timeCacheForPollingFromExternalResources");
+
+        // set archives for searching
+        this.archivesForSearching = this.fromJSONArrayToArrayList(config.getJSONArray("archivesForSearching"));
+        // set extension for searching
+        this.extensionsForSearching = this.fromJSONArrayToArrayList(config.getJSONArray("extensionsForSearching"));
+        // set external resources
+        this.externalResources = this.fromJSONArrayToArrayList(config.getJSONArray("externalResources"));
+        // set file names to avoid
+        this.avoidFileNames = this.fromJSONArrayToArrayList(config.getJSONArray("avoidFileNames"));
+
+        logger.debug("Config@Config() -> End configuartion");
+
         this.conversionLogs = new ArrayList<>();
         this.filesFound = new ArrayList<>();
         this.reports = new HashMap<>();
-        validate();
+
         this.loadCache();
     }
 
-    public void setExternalResources(List<String> externalResources) {
-        this.externalResources = externalResources;
-        this.configObj.put("externalResources", externalResources);
-    }
-
-    public void setTimeCacheForDiscoveringSearchOverFilesInSeconds(int timeCacheForDiscoveringSearchOverFilesInSeconds) {
-        this.timeCacheForDiscoveringSearchOverFilesInSeconds = timeCacheForDiscoveringSearchOverFilesInSeconds;
-        this.configObj.put("timeCacheForDiscoveringSearchOverFilesInSeconds",
-                timeCacheForDiscoveringSearchOverFilesInSeconds);
-
-    }
-
-    public void setTimeCacheForPollingFromExternalResources(int timeCacheForPollingFromExternalResources) {
-        this.timeCacheForPollingFromExternalResources = timeCacheForPollingFromExternalResources;
-        this.configObj.put("timeCacheForPollingFromExternalResources", timeCacheForPollingFromExternalResources);
-    }
-
-    public String getEcoreRequiredFilesFolder() {
-        return ecoreRequiredFilesFolder;
-    }
-
-    public String getOutputFolderName() {
-        return outputFolderName;
-    }
-
-    public List<String> getArchivesForSearching() {
-        return archivesForSearching;
-    }
-
-    public List<String> getExtensionsForSearching() {
-        return extensionsForSearching;
-    }
-
-    public List<String> getExternalResources() {
-        return externalResources;
-    }
-
-    public String getRootPath() {
-        return rootPath;
-    }
-
-    public String getConfigPath() {
-        return configPath;
-    }
-
-    public List<Map<String, Object>> getConversionLogs() {
-        return this.conversionLogs;
-    }
-
-    public Map<String, Object> getReports() {
-        return reports;
-    }
-
-    public List<String> getFilesFound() {
-        return filesFound;
-    }
-
-    public List<String> getAvoidFileNames() {
-        return avoidFileNames;
+    /**
+     * Method that take in input a json array and return an array list
+     * TODO: move in utilities class?
+     * 
+     * @param jsonArray
+     * @return List<String>
+     */
+    private List<String> fromJSONArrayToArrayList(JSONArray jsonArray) {
+        // initialize new array list
+        List<String> arrayList = new ArrayList<String>();
+        for (int i = 0; i < jsonArray.length(); i++) {
+            arrayList.add(jsonArray.getString(i));
+        }
+        return arrayList;
     }
 
     /**
-     * Try to create a file in root path defined in the config.json file
+     * Read config file frome the specified location
      * 
+     * @return
      * @throws Exception
      */
-    private void validate() throws Exception {
-        File file = new File(rootPath);
-        if (!file.exists())
-            throw new Exception("The rootPath: " + rootPath + " does not exists");
-    }
-
-    private static JSONObject loadConfig() throws Exception {
-
-        File file = new File(configPath);
-        if (!file.exists()) {
-            throw new Exception("A config.json file path must be provided");
+    private static JSONObject readConfigFile() throws Exception {
+        logger.debug("Config@readConfigFile()-> Read configuration file");
+        // read config file from config path
+        InputStream is = Config.class.getResourceAsStream(configPath);
+        if (is == null) {
+            throw new NullPointerException("Cannot find resource file " + configPath);
         }
-        if (!file.isFile()) {
-            throw new Exception("A config.json must be a file");
-        }
-        String read = String.join("\n", Files.readAllLines(file.toPath()));
-
-        JSONObject data = new JSONObject(read);
-        if (!data.has("rootPath"))
-            throw new Exception("The config.json file should have key 'rootPath'");
-
-        if (!data.has("archivesForSearching"))
-            throw new Exception("The config.json file should have key 'archivesForSearching'");
-
-        if (!data.has("outputFolderName"))
-            data.put("outputFolderName", "output-processing");
-
-        if (!data.has("extensionsForSearching"))
-            data.put("extensionsForSearching", new String[] { "aadl" });
-
-        if (!data.has("ecoreRequiredFilesFolder"))
-            throw new Exception("The config.json file should have key 'ecoreRequiredFilesFolder'");
-
-        if (!data.has("externalResources"))
-            data.put("externalResources", new String[] {});
-
-        if (!data.has("avoidFileNames"))
-            data.put("avoidFileNames", new String[] {});
-
-        if (!data.has("timeCacheForDiscoveringSearchOverFilesInSeconds"))
-            data.put("timeCacheForDiscoveringSearchOverFilesInSeconds", 60);
-
-        if (!data.has("timeCacheForPollingFromExternalResources"))
-            data.put("timeCacheForPollingFromExternalResources", 60 * 5);
+        JSONTokener tokener = new JSONTokener(is);
+        JSONObject data = new JSONObject(tokener);
         return data;
     }
 
+    /**
+     * Try to create a file in root path defined in the config.json file 
+     * 
+     * @throws Exception
+     */
+    private void validateRootPath() throws Exception {
+        File file = new File(this.rootPath);
+        if (!file.exists())
+            throw new Exception("The root path: " + this.rootPath + " does not exists");
+    }
+
+
+    /* TODO: valutare
     public void addMoreArchivesForSearching(Object data) {
         if (data instanceof Iterable) {
             for (String el : (Iterable<String>) data) {
@@ -181,13 +140,12 @@ public class Config {
                 this.archivesForSearching.add((String) data);
 
         }
-        this.configObj.put("archivesForSearching", this.archivesForSearching);
         this.saveConfig();
     }
 
     public boolean saveConfig() {
         try {
-            String jsonStr = new JSONObject(this.configObj).toString(2);
+            String jsonStr = new JSONObject(this.config).toString(2);
             FileWriter fw = new FileWriter(Paths.get(configPath).toString());
             fw.write(jsonStr);
             fw.close();
@@ -197,7 +155,7 @@ public class Config {
             e.printStackTrace();
             return false;
         }
-    }
+    }*/
 
     public boolean createFolderOutput() throws Exception {
 
@@ -299,75 +257,93 @@ public class Config {
 
     }
 
-    /////////////////////// CACHE
-    /////////////////////// STUFF////////////////////////////////////////////////////////////////////////////////
+    /*
+     * 
+     * Cache Area
+     * Todo: valutare se serve a qualcosa effettivamente
+     * 
+     * 
+     */
     public void loadCache() {
-        Path cachePath = Paths.get(this.rootPath, ".cache.txt").toAbsolutePath();
+        Path cachePath = Paths.get("storage/cache", "cache.txt").toAbsolutePath();
         File cacheFile = cachePath.toFile();
+
+        logger.debug("Config@loadCache() -> LOADING CACHE FROM DISK");
         this.cache = new HashMap<>();
-        SimpleDateFormat formatterDate = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-        System.out.println("LOADING CACHE FROM DISK");
         if (cacheFile.exists()) {
             try {
                 for (String line : Files.readAllLines(cachePath)) {
                     String[] data = line.split(",");
-                    this.cache.put(data[0].trim(), formatterDate.parse(data[1].trim()));
+                    this.cache.put(data[0].trim(), this.formatterDate.parse(data[1].trim()));
                 }
             } catch (Exception error) {
-                System.out.println("ERROR READING THE CACHE");
+                logger.error("Config@loadCache() -> "+ error.getMessage());
                 error.printStackTrace();
             }
         } else {
             try {
                 Files.createFile(cachePath);
             } catch (Exception error) {
-                System.out.println("ERROR CREATING THE CACHE");
+                logger.error("Config@loadCache() -> "+ error.getMessage());
                 error.printStackTrace();
             }
 
         }
     }
 
-    public void putInCache(String x) {
-        this.cache.put(x, new Date());
+    /**
+     * put in cache the key passed in input with date as value in the following format 24-08-2023 13:33:59
+     * 
+     * @param key
+     */
+    public void putInCache(String key) {
+        this.cache.put(key, new Date());
     }
 
-    public boolean isInCache(String x, int delay) {
-        boolean isStoredInCache = this.cache.containsKey(x);
-        if (!isStoredInCache)
+    /**
+     * Check if key is in cache, if it's in cache return false, if difference between cache time and now is greater than
+     * delay param remove key from cache and return flase, true otherwise.
+     * 
+     * @param key
+     * @param delay
+     * @return true/false
+     * 
+     */
+    public boolean isInCache(String key, int delay) {
+        // check if key is contained in cache
+        if (!this.cache.containsKey(key))
             return false;
-        Date dateOfEntry = this.cache.get(x);
+    
         Date now = new Date();
-        long diff = now.getTime() - dateOfEntry.getTime();
-        long diffSeconds = diff / 1000;
+        // Calculate time difference in seconds 
+        long diffSeconds = (now.getTime() - this.cache.get(key).getTime()) /1000;
+
         if (diffSeconds > delay) {
-            this.cache.remove(x);
+            this.cache.remove(key);
             return false;
         }
+
         return true;
     }
 
-    public Map<String, Date> getCache() {
-        return cache;
-    }
 
     public void persistCacheInDisk() {
-        Path cachePath = Paths.get(this.rootPath, ".cache.txt").toAbsolutePath();
+        Path cachePath = Paths.get("storage/cache", "cache.txt").toAbsolutePath();
         File cacheFile = cachePath.toFile();
-        SimpleDateFormat formatterDate = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        
         if (!cacheFile.exists()) {
             try {
                 Files.createFile(cachePath);
             } catch (Exception error) {
-                System.out.println("ERROR CREATING THE CACHE");
+                logger.error("Config@persistCacheInDisk() -> "+ error.getMessage());
                 error.printStackTrace();
             }
         }
+
+        
         List<String> data = new ArrayList<>();
         for (Map.Entry<String, Date> entry : this.cache.entrySet()) {
-            String key = entry.getKey();
-            Date date = entry.getValue();
-            data.add(key + "," + formatterDate.format(date));
+            data.add(entry.getKey() + "," + this.formatterDate.format(entry.getValue()));
         }
         try {
             Files.write(cachePath, data);

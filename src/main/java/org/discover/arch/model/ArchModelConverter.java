@@ -17,91 +17,38 @@ import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
-@SuppressWarnings("ResultOfMethodCallIgnored")
 public class ArchModelConverter {
-    String rootPath;
+
     Set<String> dataModelFiles = new HashSet<>();
-    List<String> extensions;
-    String folderOutputName;
+
     HashMap<String, Object> converterModelClassMap = new HashMap<>();
+
     JSONArray logsOutput = new JSONArray();
+
     List<OutputLoadedModelSchema> conversionOutput = new ArrayList<>();
+    
     Config configObj;
 
     public ArchModelConverter(Config configObj) {
+        // set config
         this.configObj = configObj;
-        this.rootPath = this.configObj.getRootPath();
-        this.extensions = this.configObj.getExtensionsForSearching();
-        this.folderOutputName = this.configObj.getOutputFolderName();
+
         converterModelClassMap.put("aadl", LoadAADLModel.getInstance());
     }
 
-    public ArchModelConverter setDataModelFiles(List<String> data) {
-        this.dataModelFiles = new HashSet<>(data);
-        return this;
-    }
-
-    public ArchModelConverter setDataModelFiles(String path) throws Exception {
-        File file = new File(path);
-        if (!file.exists())
-            throw new Exception("The file: " + path + " for loading the pathModels does not exists");
-        Scanner myReader = new Scanner(file);
-        while (myReader.hasNextLine()) {
-            String data = myReader.nextLine();
-            this.dataModelFiles.add(data);
-        }
-        return this;
-    }
-
-    public ArchModelConverter setFolderOutputName(String name) {
-        this.folderOutputName = name;
-        return this;
-    }
-
-    public ArchModelConverter setExtensions(List<String> ext) {
-        this.extensions = ext;
-        return this;
-    }
-
-    @Override
-    public String toString() {
-        return "ArchModelConverter:: rootPath: " + this.rootPath + "; " + "ext: " + this.extensions;
-    }
-
-
+   
     void copyFoundedFiles() throws Exception {
         int id = 1;
         for (String pathFile : this.dataModelFiles) {
             String extension = SearchFileTraversal.getExtension(pathFile);
             File file = new File(pathFile);
             Path originalPath = Paths.get(pathFile);
-            Path copied = Paths.get(Paths.get(this.rootPath, this.folderOutputName, extension, id + "_" + file.getName()).toString());
+            Path copied = Paths.get(Paths.get(this.configObj.getRootPath(), this.configObj.getOutputFolderName(), extension, id + "_" + file.getName()).toString());
             Files.copy(originalPath, copied, StandardCopyOption.REPLACE_EXISTING);
             id++;
         }
     }
 
-//    private void convertModelsInParallel(boolean verbose) throws Exception {
-//        int NUM_THREADS = Math.min(4, Runtime.getRuntime().availableProcessors());
-//        int chunksSize = this.dataModelFiles.size() / NUM_THREADS;
-//        List<Thread> poolThreads = new ArrayList<>();
-//        for (int i = 0; i < dataModelFiles.size(); i += chunksSize) {
-//            final int start = i;
-//            final int end = Math.min(start + chunksSize, this.dataModelFiles.size());
-//            poolThreads.add(new Thread(() -> {
-//                try {
-//                    convertSliceOfModels(start, end, verbose);
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                    throw new RuntimeException(e);
-//                }
-//            }));
-//        }
-//        poolThreads.forEach(Thread::start);
-//        for (Thread t : poolThreads) {
-//            t.join();
-//        }
-//    }
 
     private Map<String, Object> convertModelsUsingClass(String pathFile, String outPathXMI, String id) throws Exception {
         // String extension = SearchFileTraversal.getExtension(pathFile);
@@ -113,7 +60,7 @@ public class ArchModelConverter {
     void loggingConvertingResult() throws Exception {
         String jsonStr = this.logsOutput.toString(2); //TODO: This is impacting the heap memory
         try {
-            FileWriter fw = new FileWriter(Paths.get(this.rootPath, this.folderOutputName, "conversion-logs.json").toString());
+            FileWriter fw = new FileWriter(Paths.get(this.configObj.getRootPath(), this.configObj.getOutputFolderName(), "conversion-logs.json").toString());
             fw.write(jsonStr);
             fw.close();
         } catch (Exception e) {
@@ -124,7 +71,7 @@ public class ArchModelConverter {
             var jsonObject = new JSONObject(reports);
             jsonStr = jsonObject.toString(2);
             System.out.println(jsonObject);
-            FileWriter fw = new FileWriter(Paths.get(this.rootPath, this.folderOutputName, "reports-logs.json").toString());
+            FileWriter fw = new FileWriter(Paths.get(this.configObj.getRootPath(), this.configObj.getOutputFolderName(), "reports-logs.json").toString());
             fw.write(jsonStr);
             fw.close();
         } catch (Exception e) {
@@ -145,7 +92,7 @@ public class ArchModelConverter {
 
     private Map<String, HashMap<String, Object>> generateReports() {
         Map<String, HashMap<String, Object>> reports = new HashMap<>();
-        for (String ext : this.extensions) {
+        for (String ext : this.configObj.getExtensionsForSearching()) {
             reports.put(ext, new HashMap<>());
             var filteredData = this.filterOutputResults(this.logsOutput, (JSONObject el) -> el.get("extension").equals(ext));
             reports.get(ext).put("totalFiles", filteredData.length());
@@ -212,7 +159,8 @@ public class ArchModelConverter {
     }
 
     public void analyzeFileAndConvert(String pathToModelOrFolder) throws Exception {
-        String outPathXMI = Paths.get(this.rootPath, this.folderOutputName, "xmi") + "/";
+        String outPathXMI = Paths.get(this.configObj.getRootPath(), this.configObj.getOutputFolderName(), "xmi").toAbsolutePath().toString()+ "\\";
+        
         File fileSrc = new File(pathToModelOrFolder);
         Map<String, Object> dataOutput = convertModelsUsingClass(pathToModelOrFolder, outPathXMI, fileSrc.getName());
         ReentrantLock lock = new ReentrantLock();

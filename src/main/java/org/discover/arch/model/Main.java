@@ -7,7 +7,6 @@ import org.apache.log4j.Logger;
 
 public class Main {
     private static Config config = null;
-    // Initialize Log4J
     private final static Logger logger = LogManager.getLogger(Main.class);
 
     public static void main(String[] args) {
@@ -15,6 +14,8 @@ public class Main {
         try {
             // By now the config location file is hardcoded in Config class
             config = new Config();
+
+
         } catch (Exception e) {
             logger.error("Main@main -> ERROR LOADING THE CONFIG FILE: " + e.getMessage());
             return;
@@ -22,8 +23,9 @@ public class Main {
 
         try {
             boolean isCreated = config.createFolderOutput();
+
             if (!isCreated) {
-                logger.warn("Main@main -> STRUCTURE FOLDER NOT CREATED");
+                logger.warn("Main@main -> STRUCTURE FOLDER NOT CREATED, PLEASE CHECK IF ALREADY EXISTS");
                 return;
             }
 
@@ -34,9 +36,10 @@ public class Main {
             List<String> rootPathToAnalyze = resourcesProviderAnalyzer.getFileResourcePaths();
             SearchFileTraversal fileDiscover = new SearchFileTraversal(config).setSearchPaths(rootPathToAnalyze);
             ArchModelConverter archModelConverter = new ArchModelConverter(config);
+            
             fileDiscover.analyseModels(archModelConverter);
         } catch (Exception e) {
-            System.err.println("Main@main -> ERROR: " + e.getMessage());
+            logger.error("Main@main -> ERROR: " + e.getMessage());
         }
     }
 
