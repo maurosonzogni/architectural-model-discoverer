@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -117,7 +118,7 @@ public class Config {
     }
 
     /**
-     * Try to create a file in root path defined in the config.json file 
+     * Try to create a file in root path defined in the config.json file
      * 
      * @throws Exception
      */
@@ -127,25 +128,21 @@ public class Config {
             throw new Exception("The root path: " + this.rootPath + " does not exists");
     }
 
-
-    /* TODO: valutare
-    public void addMoreArchivesForSearching(Object data) {
-        if (data instanceof Iterable) {
-            for (String el : (Iterable<String>) data) {
-                if (!this.archivesForSearching.contains(el))
-                    this.archivesForSearching.add(el);
-            }
-        } else {
-            if (!this.archivesForSearching.contains((String) data))
-                this.archivesForSearching.add((String) data);
-
+    /**
+     * Add path for searching if not already exists
+     * 
+     * @param path
+     */
+    public void addMoreArchivesForSearching(String path) {
+        if (!this.archivesForSearching.contains(path)) {
+            this.archivesForSearching.add(path);
+            this.saveConfig();
         }
-        this.saveConfig();
     }
 
     public boolean saveConfig() {
         try {
-            String jsonStr = new JSONObject(this.config).toString(2);
+            String jsonStr = new JSONObject(this.archivesForSearching).toString(2);
             FileWriter fw = new FileWriter(Paths.get(configPath).toString());
             fw.write(jsonStr);
             fw.close();
@@ -155,24 +152,18 @@ public class Config {
             e.printStackTrace();
             return false;
         }
-    }*/
+    }
 
     public boolean createFolderOutput() throws Exception {
 
-        int expirationDiscover = this.timeCacheForDiscoveringSearchOverFilesInSeconds;
-        int expirationExternal = this.timeCacheForPollingFromExternalResources;
-        if (this.isInCache("createFolderOutput", expirationDiscover)) {
-            System.out.println(
-                    "\033[0;33m" + "OUTPUT FOLDER WAS CREATED BEFORE\n" + "THE CURRENT TIME INVALIDATION CACHE IS: "
-                            + expirationDiscover + "s"
-                            + "\033[0m");
+        if (this.isInCache("createFolderOutput", this.timeCacheForDiscoveringSearchOverFilesInSeconds)) {
 
-            Date dateOfEntry = this.cache.get("createFolderOutput");
-            Date expireDate = new Date(dateOfEntry.getTime() + (expirationDiscover * 1000L));
-            System.out.println("THE NEXT TIME AVAILABLE TO RUN THE DISCOVER PHASE WILL BE ON: " + "\033[0;33m"
-                    + expireDate + "\033[0m");
+            logger.info("Config@createFolderOutput() -> OUTPUT FOLDER WAS CREATED BEFORE, THE CURRENT TIME INVALIDATION CACHE IS: "
+                            + this.timeCacheForDiscoveringSearchOverFilesInSeconds + "s");
             return false;
         }
+
+        
         File file = Paths.get(this.rootPath, this.outputFolderName).toFile();
         file.mkdir();
         for (File childFile : Objects.requireNonNull(file.listFiles())) {
@@ -186,14 +177,14 @@ public class Config {
 
         // ////////GITHUB EXTERNAL RESOURCES AND FOLDER PREPARATION //////////////////
         // File gitHubDirectory = Paths.get(this.rootPath, "github").toFile();
-        // if (this.isInCache("gitHubDirectory", expirationExternal)) {
+        // if (this.isInCache("gitHubDirectory", this.timeCacheForPollingFromExternalResources)) {
         // System.out.println("\033[0;33m" + "ANALYSIS OVER EXTERNAL RESOURCES WAS
         // MADE\n" + "THE CURRENT TIME INVALIDATION CACHE IS: "
-        // + expirationExternal + "s"
+        // + this.timeCacheForPollingFromExternalResources + "s"
         // + "\033[0m");
         //
         // Date dateOfEntry = this.cache.get("gitHubDirectory");
-        // Date expireDate = new Date(dateOfEntry.getTime() + (expirationExternal *
+        // Date expireDate = new Date(dateOfEntry.getTime() + (this.timeCacheForPollingFromExternalResources *
         // 1000L));
         // System.out.println("THE NEXT TIME AVAILABLE CLONE EXTERNAL MODELS WILL BE ON:
         // " + "\033[0;33m" + expireDate + "\033[0m");
@@ -276,23 +267,22 @@ public class Config {
                     String[] data = line.split(",");
                     this.cache.put(data[0].trim(), this.formatterDate.parse(data[1].trim()));
                 }
-            } catch (Exception error) {
-                logger.error("Config@loadCache() -> "+ error.getMessage());
-                error.printStackTrace();
+            } catch (Exception e) {
+                logger.error("Config@loadCache() -> " + e.getMessage());
             }
         } else {
             try {
                 Files.createFile(cachePath);
-            } catch (Exception error) {
-                logger.error("Config@loadCache() -> "+ error.getMessage());
-                error.printStackTrace();
+            } catch (Exception e) {
+                logger.error("Config@loadCache() -> " + e.getMessage());
             }
 
         }
     }
 
     /**
-     * put in cache the key passed in input with date as value in the following format 24-08-2023 13:33:59
+     * put in cache the key passed in input with date as value in the following
+     * format 24-08-2023 13:33:59
      * 
      * @param key
      */
@@ -301,7 +291,8 @@ public class Config {
     }
 
     /**
-     * Check if key is in cache, if it's in cache return false, if difference between cache time and now is greater than
+     * Check if key is in cache, if it's in cache return false, if difference
+     * between cache time and now is greater than
      * delay param remove key from cache and return flase, true otherwise.
      * 
      * @param key
@@ -313,10 +304,10 @@ public class Config {
         // check if key is contained in cache
         if (!this.cache.containsKey(key))
             return false;
-    
+
         Date now = new Date();
-        // Calculate time difference in seconds 
-        long diffSeconds = (now.getTime() - this.cache.get(key).getTime()) /1000;
+        // Calculate time difference in seconds
+        long diffSeconds = (now.getTime() - this.cache.get(key).getTime()) / 1000;
 
         if (diffSeconds > delay) {
             this.cache.remove(key);
@@ -326,21 +317,19 @@ public class Config {
         return true;
     }
 
-
     public void persistCacheInDisk() {
         Path cachePath = Paths.get("storage/cache", "cache.txt").toAbsolutePath();
         File cacheFile = cachePath.toFile();
-        
+
         if (!cacheFile.exists()) {
             try {
                 Files.createFile(cachePath);
             } catch (Exception error) {
-                logger.error("Config@persistCacheInDisk() -> "+ error.getMessage());
+                logger.error("Config@persistCacheInDisk() -> " + error.getMessage());
                 error.printStackTrace();
             }
         }
 
-        
         List<String> data = new ArrayList<>();
         for (Map.Entry<String, Date> entry : this.cache.entrySet()) {
             data.add(entry.getKey() + "," + this.formatterDate.format(entry.getValue()));

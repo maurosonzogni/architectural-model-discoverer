@@ -5,18 +5,19 @@ import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.*;
 
-public class ResourcesProviderAnalyzer {
-    private List<String> fileResourcePaths;
-    private final List<String> externalResourcePaths;
-    Config configObj;
-    Map<String, ExternalConnector> externalConnectorMap = new HashMap<>();
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
+public class ResourcesProviderAnalyzer {
+
+    private Config configObj;
+    Map<String, ExternalConnector> externalConnectorMap = new HashMap<>();
 
     public ResourcesProviderAnalyzer(Config configObj) throws Exception {
         this.configObj = configObj;
         this.externalConnectorMap.put("github", new GithubConnector(this.configObj));
-        this.fileResourcePaths = this.configObj.getArchivesForSearching();
-        this.externalResourcePaths = this.configObj.getExternalResources();
         this.validateExternalPaths();
         boolean validationFiles = this.validateFilePaths();
         if (!validationFiles)
@@ -26,12 +27,12 @@ public class ResourcesProviderAnalyzer {
 
     private boolean validateFilePaths() {
         List<String> validFilesPaths = new ArrayList<>();
-        for (String p : this.fileResourcePaths) {
+        for (String p : this.configObj.getArchivesForSearching()) {
             File file = new File(p);
             if (file.exists())
                 validFilesPaths.add(p);
         }
-        this.fileResourcePaths = validFilesPaths;
+        this.configObj.setArchivesForSearching(validFilesPaths);
         return true;
     }
 
@@ -41,7 +42,7 @@ public class ResourcesProviderAnalyzer {
         int delayCache = this.configObj.timeCacheForPollingFromExternalResources;
         long startTime = System.nanoTime();
 
-        for (String p : this.externalResourcePaths) {
+        for (String p : this.configObj.getExternalResources()) {
             Map.Entry<String, ExternalConnector> entrySet = this.externalConnectorMap.entrySet()
                     .stream().filter((Map.Entry<String, ExternalConnector> entry) -> entry.getValue().isValidPath(p)).findAny().orElse(null);
             if (entrySet == null)
@@ -69,11 +70,4 @@ public class ResourcesProviderAnalyzer {
         System.out.println("***********************************************************************************************");
     }
 
-    public List<String> getExternalResourcePaths() {
-        return externalResourcePaths;
-    }
-
-    public List<String> getFileResourcePaths() {
-        return fileResourcePaths;
-    }
 }

@@ -15,7 +15,9 @@ public class Main {
             Config config = new Config();
 
             EcoreModelHandler ecoreModelHandler = new EcoreModelHandler(config);
+
             EolRunner eolRunner = EolRunner.getInstance();
+            
             JavaQueryAADLModelInst javaQueryAADLModelInst = JavaQueryAADLModelInst.getInstance();
 
             ecoreModelHandler.discoverModelFromPath();

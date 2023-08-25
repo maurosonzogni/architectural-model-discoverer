@@ -122,9 +122,9 @@ public class ArchModelConverter {
             writer.writeNext(header);
             for (OutputLoadedModelSchema element : this.conversionOutput) {
                 String[] row = new String[header.length];
-                row[0] = element.modelName;
-                row[1] = element.pathAADLFile;
-                row[2] = element.isParsingSucceeded + "";
+                row[0] = element.getModelName();
+                row[1] = element.getPathAADLFile();
+                row[2] = element.isParsingSucceeded() + "";
                 int ref_resolving_error = 0;
                 int syntaxError = 0;
                 Set<String> errorCodes = new HashSet<>();
@@ -184,9 +184,5 @@ public class ArchModelConverter {
         }
     }
 
-    public void clear(){
-        this.dataModelFiles = null;
-        this.logsOutput = null;
-        this.conversionOutput = null;
-    }
+
 }

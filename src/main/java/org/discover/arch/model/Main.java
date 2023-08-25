@@ -15,16 +15,14 @@ public class Main {
             // By now the config location file is hardcoded in Config class
             config = new Config();
 
-
         } catch (Exception e) {
             logger.error("Main@main -> ERROR LOADING THE CONFIG FILE: " + e.getMessage());
             return;
         }
 
         try {
-            boolean isCreated = config.createFolderOutput();
 
-            if (!isCreated) {
+            if (!config.createFolderOutput()) {
                 logger.warn("Main@main -> STRUCTURE FOLDER NOT CREATED, PLEASE CHECK IF ALREADY EXISTS");
                 return;
             }
@@ -33,10 +31,10 @@ public class Main {
             logger.info("ANALYZING THE RESOURCES PATHS");
 
             ResourcesProviderAnalyzer resourcesProviderAnalyzer = new ResourcesProviderAnalyzer(config);
-            List<String> rootPathToAnalyze = resourcesProviderAnalyzer.getFileResourcePaths();
-            SearchFileTraversal fileDiscover = new SearchFileTraversal(config).setSearchPaths(rootPathToAnalyze);
+            SearchFileTraversal fileDiscover = new SearchFileTraversal(config)
+                    .setSearchPaths(resourcesProviderAnalyzer.getConfigObj().getArchivesForSearching());
             ArchModelConverter archModelConverter = new ArchModelConverter(config);
-            
+
             fileDiscover.analyseModels(archModelConverter);
         } catch (Exception e) {
             logger.error("Main@main -> ERROR: " + e.getMessage());

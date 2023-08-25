@@ -15,6 +15,7 @@ import org.eclipse.jgit.lib.Ref;
 
 
 public class GithubConnector implements ExternalConnector {
+    
     private Config configObj;
 
     GithubConnector(Config configObj) {
@@ -53,7 +54,7 @@ public class GithubConnector implements ExternalConnector {
                     .call();
             System.out.println("FINISH OF CLONING REPOSITORY: " + metaData.downloadablePath);
             configObj.putInCache(externalRepoURL);
-            //configObj.addMoreArchivesForSearching(directoryPath);
+            configObj.addMoreArchivesForSearching(directoryPath);
         } catch (Exception error) {
             System.out.println("Error cloning the repo from Github");
             error.printStackTrace();

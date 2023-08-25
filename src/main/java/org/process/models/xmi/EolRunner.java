@@ -16,16 +16,17 @@ public class EolRunner implements QueryModel {
     }
 
     static public EolRunner getInstance() {
-        if (INSTANCE != null)
-            return INSTANCE;
-        INSTANCE = new EolRunner();
+        if (INSTANCE == null) {
+            INSTANCE = new EolRunner();
+        }
         return INSTANCE;
     }
 
     /**
      * @param eolScript: Name of the .eol script
      * @param modelPath: Path of the aaxl2 instance model
-     * @return Map that contains the result of several metrics computed over the model
+     * @return Map that contains the result of several metrics computed over the
+     *         model
      */
     @Override
     public Map<String, Object> run(String eolScript, String modelPath) throws Exception {
@@ -42,16 +43,17 @@ public class EolRunner implements QueryModel {
     }
 
     @Override
-    public  Map<String, Object> run(String modelPath) throws Exception {
+    public Map<String, Object> run(String modelPath) throws Exception {
         return this.run("main", modelPath);
     }
 
     @Override
-    public  Map<String, Object> run(String modelPath, Map<String, Object> data) throws Exception {
+    public Map<String, Object> run(String modelPath, Map<String, Object> data) throws Exception {
         return this.run("main", modelPath);
     }
 
-    protected EmfModel createEmfModel(String name, String modelUri, String metaModelURI, boolean readOnLoad, boolean storeOnDisposal)
+    protected EmfModel createEmfModel(String name, String modelUri, String metaModelURI, boolean readOnLoad,
+            boolean storeOnDisposal)
             throws EolModelLoadingException {
         EmfModel emfModel = new EmfModel();
         emfModel.setMetamodelFile(metaModelURI);

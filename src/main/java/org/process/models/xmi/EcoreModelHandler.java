@@ -1,7 +1,6 @@
 package org.process.models.xmi;
 
 import com.opencsv.CSVWriter;
-import org.apache.commons.collections.map.LinkedMap;
 import org.discover.arch.model.Config;
 import org.discover.arch.model.SearchFileTraversal;
 
@@ -195,11 +194,6 @@ public class EcoreModelHandler {
 
     }
 
-    public void clear() {
-        this.processedDataFromModel = null;
-        this.configObj = null;
-        this.uriModels = null;
-    }
 }
 
 

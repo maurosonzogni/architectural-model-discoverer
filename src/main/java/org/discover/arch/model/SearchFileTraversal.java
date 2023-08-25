@@ -127,8 +127,4 @@ public class SearchFileTraversal {
         return this;
     }
 
-    public void clear(){
-        this.searchPaths = null;
-        this.dataFilesFound = new HashSet<>();
-    }
 }

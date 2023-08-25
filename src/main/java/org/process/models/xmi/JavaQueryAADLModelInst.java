@@ -8,6 +8,7 @@ import java.util.*;
 
 public class JavaQueryAADLModelInst implements QueryModel {
     private static JavaQueryAADLModelInst INSTANCE = null;
+
     public LoadXMIModel loadXMIModel = LoadXMIModel.getInstance();
 
     final String COUPLING = "coupling";
@@ -23,9 +24,9 @@ public class JavaQueryAADLModelInst implements QueryModel {
     }
 
     static public JavaQueryAADLModelInst getInstance() {
-        if (INSTANCE != null)
-            return INSTANCE;
-        INSTANCE = new JavaQueryAADLModelInst();
+        if (INSTANCE == null) {
+            INSTANCE = new JavaQueryAADLModelInst();
+        }
         return INSTANCE;
     }
 
@@ -54,9 +55,11 @@ public class JavaQueryAADLModelInst implements QueryModel {
 
         GraphMetricsCalculator graphModelMetricsCalculator = new GraphMetricsCalculator(resourceModel);
         computeStructuralMetrics(resourceModel, dataOutput);
-//        dataOutput.put(this.GRAPH_STR_REPRESENTATION, graphModelMetricsCalculator.getGraphTokens());
+        // dataOutput.put(this.GRAPH_STR_REPRESENTATION,
+        // graphModelMetricsCalculator.getGraphTokens());
         dataOutput.put(this.AVG_SHORTEST_PATH, graphModelMetricsCalculator.getAvgShortestPath());
-//        dataOutput.put(this.AVG_CLUSTERING_COEFFICIENT, graphModelMetricsCalculator.getAvgClusteringCoefficient(100));
+        // dataOutput.put(this.AVG_CLUSTERING_COEFFICIENT,
+        // graphModelMetricsCalculator.getAvgClusteringCoefficient(100));
         dataOutput.put(this.AVG_DEGREE_CENTRALITY, graphModelMetricsCalculator.getDegreeCentrality());
 
         return dataOutput;
@@ -64,21 +67,27 @@ public class JavaQueryAADLModelInst implements QueryModel {
 
     /**
      * @param resourceModel The models load in memory
-     *                      The computation of coupling is made as: in_feature / in_feature + out_feature
-     *                      The computation of cohesion its returned as: e / (n(n-1))/2
-     *                      The computation of complexity, for every component Sum over all components c(i) = c_input(i) * c_output(i)
+     *                      The computation of coupling is made as: in_feature /
+     *                      in_feature + out_feature
+     *                      The computation of cohesion its returned as: e /
+     *                      (n(n-1))/2
+     *                      The computation of complexity, for every component Sum
+     *                      over all components c(i) = c_input(i) * c_output(i)
      */
     public void computeStructuralMetrics(Resource resourceModel, Map<String, Object> data) {
         SystemInstance sys = (SystemInstance) resourceModel.getContents().get(0);
-        List<ComponentInstance> componentInstances = sys.getAllComponentInstances().stream().filter((ComponentInstance x) -> x != sys).toList();
+        List<ComponentInstance> componentInstances = sys.getAllComponentInstances().stream()
+                .filter((ComponentInstance x) -> x != sys).toList();
         List<ConnectionInstance> connectionInstances = sys.getAllConnectionInstances();
 
         ///////////////////// Coupling //////////////////////////////
         double coupling = 0;
         for (ComponentInstance c : componentInstances) {
             List<FeatureInstance> portFeaturePerComponents = c.getAllFeatureInstances();
-            long in_features = portFeaturePerComponents.stream().filter((FeatureInstance fe) -> fe.getDirection().incoming()).count();
-            long out_features = portFeaturePerComponents.stream().filter((FeatureInstance fe) -> fe.getDirection().outgoing()).count();
+            long in_features = portFeaturePerComponents.stream()
+                    .filter((FeatureInstance fe) -> fe.getDirection().incoming()).count();
+            long out_features = portFeaturePerComponents.stream()
+                    .filter((FeatureInstance fe) -> fe.getDirection().outgoing()).count();
             if (in_features + out_features > 0) {
                 coupling += (float) in_features / ((float) out_features + (float) in_features);
             }
@@ -99,8 +108,10 @@ public class JavaQueryAADLModelInst implements QueryModel {
         int complexity = 0;
         for (ComponentInstance c : componentInstances) {
             List<FeatureInstance> portFeaturePerComponents = c.getAllFeatureInstances();
-            long in_features = portFeaturePerComponents.stream().filter((FeatureInstance fe) -> fe.getDirection().incoming()).count();
-            long out_features = portFeaturePerComponents.stream().filter((FeatureInstance fe) -> fe.getDirection().outgoing()).count();
+            long in_features = portFeaturePerComponents.stream()
+                    .filter((FeatureInstance fe) -> fe.getDirection().incoming()).count();
+            long out_features = portFeaturePerComponents.stream()
+                    .filter((FeatureInstance fe) -> fe.getDirection().outgoing()).count();
             complexity += in_features * out_features;
         }
         data.put(this.COMPLEXITY, complexity);

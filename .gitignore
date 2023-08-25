@@ -25,14 +25,14 @@ models/legends.csv
 models/files-found.txt
 models/.files-found.txt
 models/results.csv
-models/.cache.txt
+models/
 models/github
 
 # aadl
 *.aadl*
 # aaxl
 *.aaxl*
-
 # log file
-
 *.log
+# cache
+storage/

@@ -2,31 +2,31 @@ package org.discover.arch.model;
 
 import java.util.*;
 
-public class OutputLoadedModelSchema {
-    public List<Object> errors;
-    public String pathXMLFile;
-    public String pathAADLFile;
-    public String modelName;
-    public boolean isParsingSucceeded;
-    public boolean isSavedTheModel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-    public OutputLoadedModelSchema() {
-        this.errors = new ArrayList<>();
-        this.pathAADLFile = "";
-        this.pathXMLFile = "";
-        this.modelName = "";
-        this.isParsingSucceeded = true;
-        this.isSavedTheModel = false;
-    }
+@Getter
+@Setter
+@NoArgsConstructor
+public class OutputLoadedModelSchema {
+    private List<Object> errors;
+    private String pathXMLFile;
+    private String pathAADLFile;
+    private String modelName;
+    private boolean isParsingSucceeded = true;
+    private boolean isSavedTheModel = false;
+
 
     public OutputLoadedModelSchema(OutputLoadedModelSchema o) {
-        this.errors = o.errors;
-        this.pathAADLFile = o.pathAADLFile;
-        this.modelName = o.modelName;
-        this.pathXMLFile = "";
-        this.isParsingSucceeded = true;
-        this.isSavedTheModel = false;
+        setErrors(o.getErrors());
+        setPathAADLFile(o.getPathAADLFile());
+        setModelName(o.getModelName());
+        setPathXMLFile("");
+        setParsingSucceeded(true); 
+        setSavedTheModel(false);
     }
+    
 
     public List<Object> getErrors(boolean filtered) {
         if (this.errors == null)
@@ -60,15 +60,5 @@ public class OutputLoadedModelSchema {
         data.put("pathXMLFile", this.pathXMLFile);
         data.put("errors", listErrors);
         return data;
-    }
-
-    @Override
-    public String toString() {
-        return "modelName: " + this.modelName + "\n" +
-                "isParsingSucceeded: " + this.isParsingSucceeded + "\n" +
-                "isSavedTheModel: " + this.isSavedTheModel + "\n" +
-                "pathAADLFile: " + this.pathAADLFile + "\n" +
-                "pathXMLFile: " + this.pathXMLFile + "\n" +
-                "errors: " + this.errors + "\n";
     }
 }
