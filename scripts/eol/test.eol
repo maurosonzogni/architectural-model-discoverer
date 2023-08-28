@@ -1,0 +1,25 @@
+/*
+* Simple eol file with test pourpose
+* Actually the incomming models are called: Model1 and Model2
+*/
+
+checkModel();
+
+createMatrix();
+
+
+// Operation region
+
+operation createMatrix(){
+    return "Creating matrix!".println();
+}
+
+// check if model are passed correctly
+operation checkModel() {
+	var systemName1 = Model1!SystemInstance.all().first().name;
+    var systemName2 = Model2!SystemInstance.all().first().name;
+    var components1 = Model1!ComponentInstance.all().size();
+    var components2 = Model2!ComponentInstance.all().size();
+    return systemName1.println()+" "+ systemName2.println();
+
+}

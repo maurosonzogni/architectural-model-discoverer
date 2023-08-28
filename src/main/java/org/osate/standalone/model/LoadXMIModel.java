@@ -38,15 +38,4 @@ public class LoadXMIModel {
         return resource;
     }
 
-    /**
-     * @param resource
-     * @return EObject that contains the model
-     */
-    public EObject getEObjectFromResource(Resource resource) {
-        return resource.getContents().get(0);
-    }
-
-    public TreeIterator<EObject> getContentFromResource(Resource resource) {
-        return resource.getAllContents();
-    }
 }
