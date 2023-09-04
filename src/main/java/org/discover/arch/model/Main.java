@@ -1,6 +1,5 @@
 package org.discover.arch.model;
 
-import java.util.List;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;

@@ -1,7 +1,6 @@
 package org.process.models.xmi;
 
 import org.eclipse.epsilon.eol.EolModule;
-import org.eclipse.epsilon.eol.exceptions.EolRuntimeException;
 import org.eclipse.epsilon.eol.exceptions.models.EolModelLoadingException;
 import org.eclipse.epsilon.emc.emf.EmfModel;
 
@@ -43,22 +42,6 @@ public class EolRunner implements QueryModel {
         return (Map<String, Object>) module.execute();
     }
 
-    @Override
-    public void test(String modelPath1,String modelPath2) throws Exception{
-        // Create new eol modue
-        EolModule module = new EolModule();
-        Path rootPath = Paths.get("scripts", "eol").toAbsolutePath();
-        String eolPath = rootPath.resolve("test.eol").toString();
-        module.parse(new File(eolPath));
-        String metaModelPath = Paths.get("ecore", "aadl2_inst.ecore").toAbsolutePath().toString();
-        EmfModel model1 = createEmfModel("Model1", modelPath1, metaModelPath, true, false);
-        EmfModel model2 = createEmfModel("Model2", modelPath2, metaModelPath, true, false);
-        module.parse(new File(eolPath));
-        module.getContext().getModelRepository().addModel(model1);
-        module.getContext().getModelRepository().addModel(model2);
-        module.execute();
-
-    }
 
     @Override
     public Map<String, Object> run(String modelPath) throws Exception {

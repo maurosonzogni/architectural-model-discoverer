@@ -1,8 +1,11 @@
 package org.process.models.xmi;
 
+import java.util.List;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.discover.arch.model.Config;
+import org.eclipse.epsilon.ecl.trace.MatchTrace;
 
 public class Main {
 
@@ -16,16 +19,39 @@ public class Main {
 
             EcoreModelHandler ecoreModelHandler = new EcoreModelHandler(config);
 
-            EolRunner eolRunner = EolRunner.getInstance();
-            
-            JavaQueryAADLModelInst javaQueryAADLModelInst = JavaQueryAADLModelInst.getInstance();
+            /*
+             * TODO: scommentare
+             * EolRunner eolRunner = EolRunner.getInstance();
+             * 
+             * JavaQueryAADLModelInst javaQueryAADLModelInst =
+             * JavaQueryAADLModelInst.getInstance();
+             * 
+             * ecoreModelHandler.discoverModelFromPath();
+             * config.loadJSONFilesGeneratedByDiscoveringPhase();
+             * ecoreModelHandler.processModels(eolRunner, javaQueryAADLModelInst);
+             * 
+             * ecoreModelHandler.generateCSVFileFromProcessedModels("results");
+             */
 
-            ecoreModelHandler.discoverModelFromPath();
-            config.loadJSONFilesGeneratedByDiscoveringPhase();
-            ecoreModelHandler.processModels(eolRunner, javaQueryAADLModelInst);
+            // TEST ECL
+            logger.info("INIZIO TEST ECL");
+            EclRunner eclRunner = EclRunner.getInstance();
 
-            ecoreModelHandler.generateCSVFileFromProcessedModels("results");
-            
+            List<String> uriModels = ecoreModelHandler.discoverModelPath();
+
+            // Attualmente ci appoggiamo a ecoreModelHandler, si potrebbe rendere più
+            // snesato
+            for (int i = 0; i < ecoreModelHandler.discoverModelPath().size(); i++) {
+                for (int j = 0; j < ecoreModelHandler.discoverModelPath().size(); j++) {
+                    try {
+                        MatchTrace c = eclRunner.test(uriModels.get(i), uriModels.get(j));
+
+                    } catch (Exception e) {
+                        logger.error("Error performing ECL script: " + e.getMessage());
+                    }
+                }
+            }
+
         } catch (Exception e) {
             logger.info("Main@main -> ERROR: " + e.getMessage());
         }

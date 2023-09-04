@@ -8,6 +8,4 @@ public interface QueryModel {
     Map<String, Object> run(String modelPath) throws Exception;
 
     Map<String,Object> run(String modelPath, Map<String, Object> data) throws Exception;
-
-    void test(String modelPath1, String modelPath2 ) throws Exception;
 }

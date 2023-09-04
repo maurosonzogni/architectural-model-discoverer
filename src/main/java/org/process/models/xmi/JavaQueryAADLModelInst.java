@@ -125,11 +125,5 @@ public class JavaQueryAADLModelInst implements QueryModel {
 
     }
 
-    @Override
-    public void test(String modelPath1, String modelPath2) throws Exception {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'test'");
-    }
-
 
 }

@@ -64,6 +64,29 @@ public class EcoreModelHandler {
                 });
     }
 
+    // TODO: valutare dove e come mettere questo, che non è altro che il metodo
+    // precedente con un return
+    public List<String> discoverModelPath() throws Exception {
+        if (rootPathFolder == null)
+            throw new Exception("There is not root path for reading the XMI models");
+        File rootPathFolderFile = Paths.get(rootPathFolder).toFile();
+        if (!rootPathFolderFile.exists())
+            throw new Exception("The path to get the xmi converted files does not exist: " + rootPathFolderFile);
+        if (!rootPathFolderFile.isDirectory())
+            throw new Exception("The file to process the xmi converted models must be a directory");
+        List<String> uris = new ArrayList<>();
+        Files.walk(Path.of(rootPathFolder)).sorted().map(Path::toFile).forEach(
+                (File file) -> {
+                    if (file.isFile()) {
+                        String uriModel = file.getPath();
+                        String ext = SearchFileTraversal.getExtension(uriModel);
+                        if (this.modelExtension.contains(ext))
+                            uris.add(file.getPath());
+                    }
+                });
+        return uris;
+    }
+
     public void processModels(QueryModel eolBasedModelQuery, QueryModel javaBasedModelQuery) {
         logger.info("EcoreModelHandler@processModels() -> PARSING AND GETTING THE ECORE OBJECT FROM MODELS XMI");
         int indexFile = 1;
@@ -85,17 +108,6 @@ public class EcoreModelHandler {
                 e.printStackTrace();
             }
             indexFile++;
-        }
-
-        // test mauro
-        logger.info("INIZIO TEST");
-        for (int i = 0; i < this.uriModels.size() - 1; i++) {
-            try {
-                eolBasedModelQuery.test(this.uriModels.get(i), this.uriModels.get(i + 1));
-
-            } catch (Exception e) {
-                System.err.println("Error performing query over the model: " + e.getMessage());
-            }
         }
 
         long endTime = System.nanoTime();
