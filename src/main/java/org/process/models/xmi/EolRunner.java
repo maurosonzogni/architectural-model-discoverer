@@ -1,7 +1,10 @@
 package org.process.models.xmi;
 
 import org.eclipse.epsilon.eol.EolModule;
-import org.eclipse.epsilon.eol.exceptions.models.EolModelLoadingException;
+import org.utils.Utils;
+
+import lombok.NoArgsConstructor;
+
 import org.eclipse.epsilon.emc.emf.EmfModel;
 
 import java.io.File;
@@ -9,11 +12,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
+@NoArgsConstructor
 public class EolRunner implements QueryModel {
+   
     private static EolRunner INSTANCE = null;
-
-    private EolRunner() {
-    }
 
     static public EolRunner getInstance() {
         if (INSTANCE == null) {
@@ -36,7 +38,7 @@ public class EolRunner implements QueryModel {
         Path rootPath = Paths.get("scripts", "eol").toAbsolutePath();
         String eolPath = rootPath.resolve(eolScript + ".eol").toString();
         String metaModelPath = Paths.get("ecore", "aadl2_inst.ecore").toAbsolutePath().toString();
-        EmfModel model = createEmfModel("ModelImpl", modelPath, metaModelPath, true, false);
+        EmfModel model = Utils.createEmfModel("ModelImpl", modelPath, metaModelPath, true, false);
         module.parse(new File(eolPath));
         module.getContext().getModelRepository().addModel(model);
         return (Map<String, Object>) module.execute();
@@ -53,16 +55,4 @@ public class EolRunner implements QueryModel {
         return this.run("main", modelPath);
     }
 
-    protected EmfModel createEmfModel(String name, String modelUri, String metaModelURI, boolean readOnLoad,
-            boolean storeOnDisposal)
-            throws EolModelLoadingException {
-        EmfModel emfModel = new EmfModel();
-        emfModel.setMetamodelFile(metaModelURI);
-        emfModel.setModelFile(modelUri);
-        emfModel.setReadOnLoad(readOnLoad);
-        emfModel.setStoredOnDisposal(storeOnDisposal);
-        emfModel.setName(name);
-        emfModel.load();
-        return emfModel;
-    }
 }
