@@ -1,14 +1,25 @@
 pre {
     // https://github.com/tdebatty/java-string-similarity
     var levenshtein = new Native("info.debatty.java.stringsimilarity.NormalizedLevenshtein");
+
+    
+    var connectorsFirstModel = FirstModel!ConnectionInstance.all().size();
+    var connectorsSecondModel = SecondModel!ConnectionInstance.all().size();
+    var totalConnectors = connectorsFirstModel + connectorsSecondModel;
+
+    var componentsFirstModel = FirstModel!ComponentInstance.all().size();
+    var componentsSecondModel = SecondModel!ComponentInstance.all().size();
+    var totalComponents = componentsFirstModel + componentsSecondModel;
+
+    // Print System Instatce name
     info();
-    //Sommo le due distanze per ottenere un'unica distanza che attualmente chiamiamo di edit
-    var editDistance = numberOfComponentDistance() + numberOfConnectorDistance();
+    //Sommo le due distanze per ottenere un'unica distanza che attualmente chiamiamo di edit e le divido per il totale di connettorie  componenti
+    var editDistance = (((numberOfComponentDistance() + numberOfConnectorDistance())/(totalComponents + totalConnectors)).asReal());
 }
 
 
 
-rule FuzzyTree2Tree 
+rule StructuralSimilarity 
     match l : FirstModel!ComponentInstance
     with r : SecondModel!ComponentInstance {
 
@@ -16,8 +27,10 @@ rule FuzzyTree2Tree
 }
 
 operation String fuzzyMatch(other : String) : Boolean {
+    //self.println();
+    //other.println();
 
-   // levenshtein.distance(self,other).println();
+   //levenshtein.distance(self,other).println();
     
     return true;
 }
@@ -25,28 +38,24 @@ operation String fuzzyMatch(other : String) : Boolean {
 
 
 // Per ora stampa semplicemente il numero delle componenti dei due modelli
-operation numberOfComponentDistance(): Integer{
-    var componentsFirstModel = FirstModel!ComponentInstance.all().size();
-    var componentsSecondModel = SecondModel!ComponentInstance.all().size();
+operation numberOfComponentDistance(): Real{
     ("# di componenti dei modelli: "+ componentsFirstModel + " | " + componentsSecondModel).println();
     // manteniamo sempre un  numero positivo
     if(componentsFirstModel>=componentsSecondModel){
-        return componentsFirstModel - componentsSecondModel;
+        return ((componentsFirstModel - componentsSecondModel).asReal());
     }else{
-        return componentsSecondModel - componentsFirstModel;
+        return ((componentsSecondModel - componentsFirstModel).asReal());
     }
      
 }
 
-operation numberOfConnectorDistance(): Integer{
-    var connectorsFirstModel = FirstModel!ConnectionInstance.all().size();
-    var connectorsSecondModel = SecondModel!ConnectionInstance.all().size();
+operation numberOfConnectorDistance(): Real{
     ("# di connettori dei modelli: "+ connectorsFirstModel + " | " + connectorsSecondModel).println();
     // manteniamo sempre un  numero positivo
     if(connectorsFirstModel>=connectorsSecondModel){
-        return connectorsFirstModel -connectorsSecondModel;
+        return ((connectorsFirstModel - connectorsSecondModel).asReal());
     }else{
-        return connectorsSecondModel - connectorsFirstModel;
+        return ((connectorsSecondModel - connectorsFirstModel).asReal());
     }
 
 }
@@ -55,6 +64,7 @@ operation numberOfConnectorDistance(): Integer{
 operation info() {
     ("Evaluating: "+ FirstModel!SystemInstance.all().first().name +" | "+SecondModel!SystemInstance.all().first().name).println();
 }
+
 
 /*
 IDEA per MATRICE
@@ -72,5 +82,11 @@ MATRIX
 8       12      78      106     83      0       5
 3       17      83      111     88      5       0
 
+Sviluppo idea matrice
+
+
+
 
 */
+
+

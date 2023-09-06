@@ -31,7 +31,7 @@ public class Main {
 
             EclRunner eclRunner = EclRunner.getInstance();
 
-            eclRunner.run("test.ecl", ecoreModelHandler.discoverModelPath());
+            eclRunner.run("structural.similarity.ecl", ecoreModelHandler.discoverModelPath());
 
         } catch (Exception e) {
             logger.info("Main@main -> ERROR: " + e.getMessage());

@@ -20,7 +20,6 @@ public class Utils {
      * @return EmfModel
      * @throws EolModelLoadingException
      * 
-     *                                  TODO: valutare se mettere tutto in utils
      */
     public static EmfModel createEmfModel(String name, String modelURI, String metaModelURI, boolean readOnLoad,
             boolean storeOnDisposal)
@@ -48,7 +47,7 @@ public class Utils {
      * 
      * @param matrix
      */
-    public static void print2dArray(int[][] matrix) {
+    public static void print2dArray(Double[][] matrix) {
         System.out.println("MATRIX");
         for (int r = 0; r < matrix.length; r++) {
             for (int c = 0; c < matrix[0].length; c++) {
