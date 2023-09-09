@@ -16,22 +16,31 @@ public class Main {
 
             EcoreModelHandler ecoreModelHandler = new EcoreModelHandler(config);
 
-            EolRunner eolRunner = EolRunner.getInstance();
-
-            JavaQueryAADLModelInst javaQueryAADLModelInst = JavaQueryAADLModelInst.getInstance();
-
-            ecoreModelHandler.discoverModelFromPath();
-            config.loadJSONFilesGeneratedByDiscoveringPhase();
-            ecoreModelHandler.processModels(eolRunner, javaQueryAADLModelInst);
-
-            ecoreModelHandler.generateCSVFileFromProcessedModels("results");
+            /*
+             * scommentare
+             * 
+             * EolRunner eolRunner = EolRunner.getInstance();
+             * 
+             * JavaQueryAADLModelInst javaQueryAADLModelInst =
+             * JavaQueryAADLModelInst.getInstance();
+             * 
+             * ecoreModelHandler.discoverModelFromPath();
+             * config.loadJSONFilesGeneratedByDiscoveringPhase();
+             * ecoreModelHandler.processModels(eolRunner, javaQueryAADLModelInst);
+             * 
+             * ecoreModelHandler.generateCSVFileFromProcessedModels("results");
+             */
 
             // TEST ECL
             logger.info("INIZIO FASE ECL");
 
             EclRunner eclRunner = EclRunner.getInstance();
+            long startTimeEclRunner = System.nanoTime();
 
             eclRunner.run("structural.similarity.ecl", ecoreModelHandler.discoverModelPath());
+            long endTimeEclRunner = System.nanoTime();
+
+            logger.info("Ecl runner execution time in seconds: " + ((endTimeEclRunner - startTimeEclRunner)/ 1000000000)+ " s");
 
         } catch (Exception e) {
             logger.info("Main@main -> ERROR: " + e.getMessage());
