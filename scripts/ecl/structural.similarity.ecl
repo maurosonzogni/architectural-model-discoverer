@@ -1,20 +1,20 @@
 pre {
     // https://github.com/tdebatty/java-string-similarity
     var levenshtein = new Native("info.debatty.java.stringsimilarity.NormalizedLevenshtein");
-
     
+    // Import Math
+    var Math = Native("java.lang.Math");
+
     var connectorsFirstModel = FirstModel!ConnectionInstance.all().size();
     var connectorsSecondModel = SecondModel!ConnectionInstance.all().size();
-    var totalConnectors = connectorsFirstModel + connectorsSecondModel;
 
     var componentsFirstModel = FirstModel!ComponentInstance.all().size();
     var componentsSecondModel = SecondModel!ComponentInstance.all().size();
-    var totalComponents = componentsFirstModel + componentsSecondModel;
 
     // Print System Instatce name
     info();
-    //Sommo le due distanze per ottenere un'unica distanza che attualmente chiamiamo di edit e le divido per il totale di connettorie  componenti
-    var editDistance = (((numberOfComponentDistance() + numberOfConnectorDistance())/(totalComponents + totalConnectors)).asReal());
+   
+    var editDistance = numberOfComponentDistance()*0.5+ numberOfConnectorDistance()*0.5;
 }
 
 
@@ -27,43 +27,46 @@ rule StructuralSimilarity
 }
 
 operation String fuzzyMatch(other : String) : Boolean {
-    //self.println();
-    //other.println();
 
-   //levenshtein.distance(self,other).println();
-    
+    //levenshtein.distance(clearName(self),clearName(other)).println();
     return true;
 }
 
-
-
-// Per ora stampa semplicemente il numero delle componenti dei due modelli
 operation numberOfComponentDistance(): Real{
     ("# di componenti dei modelli: "+ componentsFirstModel + " | " + componentsSecondModel).println();
-    // manteniamo sempre un  numero positivo
-    if(componentsFirstModel>=componentsSecondModel){
-        return ((componentsFirstModel - componentsSecondModel).asReal());
-    }else{
-        return ((componentsSecondModel - componentsFirstModel).asReal());
-    }
+    // Differenza della numerosità di componenti in valore assoluto / massimo numero di componenti;
+    return Math.abs(componentsFirstModel - componentsSecondModel).asDouble()/Math.max(componentsFirstModel,componentsSecondModel).asDouble();
      
 }
 
 operation numberOfConnectorDistance(): Real{
     ("# di connettori dei modelli: "+ connectorsFirstModel + " | " + connectorsSecondModel).println();
-    // manteniamo sempre un  numero positivo
-    if(connectorsFirstModel>=connectorsSecondModel){
-        return ((connectorsFirstModel - connectorsSecondModel).asReal());
-    }else{
-        return ((connectorsSecondModel - connectorsFirstModel).asReal());
-    }
-
+    // Differenza della numerosità di connettori in valore assoluto / massimo numero di connettori;
+    return Math.abs(connectorsFirstModel - connectorsSecondModel).asDouble()/Math.max(connectorsFirstModel,connectorsSecondModel).asDouble();  
 }
 
-// Print name of the systems 
+// Print name of the component
 operation info() {
+    "##################################################################################################################".println();
     ("Evaluating: "+ FirstModel!SystemInstance.all().first().name +" | "+SecondModel!SystemInstance.all().first().name).println();
 }
+
+
+// Return the original name or the name without this_
+
+operation clearName(name : String): String{
+
+    // Check if name length is at least 5
+    if (name.length() > 4){
+        // Check if firsts 5 char are equal to this_
+        if(name.substring(0,5).equalsIgnoreCase("this_")){
+            // Trim this_
+            name = name.substring(5);
+        }
+    }
+    return name;
+}
+
 
 
 /*
@@ -71,22 +74,26 @@ IDEA per MATRICE
 Similarità strutturale calcolata come distanza di edit
 Edit distance: given a cost function on edit operations (e.g. addition/deletion of nodes and edges), determine the minimum cost
 transformation from one graph to another. In our case we consider the cost of addition/deletion equals to 1, nodes= components and edges= connectors
-SD = (distanzaConnettori+distanzaComponenti)--> prova banale
+
+Evry element of matrix is computed as described below:
+
+element[i][j]= (|(n. components first model - n. components second model) / max(n. components first model,n. components second model)|)*weigth +
+                (|(n. connectors first model - n. connectors second model) / max(n. connectors first model,n. connectors second model)|)*weigth;
+
+where actual weigth= 0.5
 result example below
-MATRIX
-0       20      86      114     91      8       3
-20      0       66      94      71      12      17
-86      66      0       28      5       78      83
-114     94      28      0       23      106     111
-91      71      5       23      0       83      88
-8       12      78      106     83      0       5
-3       17      83      111     88      5       0
+MATRIX(using only example models)
+0.0     0.842   0.943   0.965   0.951   0.733   0.5
+0.842   0.0     0.691   0.792   0.726   0.458   0.683
+0.943   0.691   0.0     0.29    0.09    0.814   0.886
+0.965   0.792   0.29    0.0     0.225   0.882   0.929
+0.951   0.726   0.09    0.225   0.0     0.839   0.902
+0.733   0.458   0.814   0.882   0.839   0.0     0.467
+0.5     0.683   0.886   0.929   0.902   0.467   0.0
 
-Sviluppo idea matrice
-
-
-
+Execution time ~ 2 seconds
 
 */
+
 
 
