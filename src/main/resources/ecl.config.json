@@ -1,0 +1,9 @@
+{
+    "eclScriptsFolderPath": "scripts/ecl",
+    "eclScriptName": "structural.similarity.test.ecl",
+    "csvFileFolderPath": "report",
+    "csvFileName": "similarity.csv",
+    "eclParams": {
+        "threshold": 0.66
+    }
+}
