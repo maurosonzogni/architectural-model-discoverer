@@ -2,8 +2,8 @@ package org.process.models.xmi;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.config.EclConfig;
 import org.discover.arch.model.Config;
-import org.utils.Utils;
 
 public class Main {
 
@@ -14,6 +14,8 @@ public class Main {
         logger.info("Main@main -> Running ECORE processing");
         try {
             Config config = new Config();
+
+            EclConfig eclConfig = new EclConfig();
 
             EcoreModelHandler ecoreModelHandler = new EcoreModelHandler(config);
 
@@ -38,7 +40,7 @@ public class Main {
             EclRunner eclRunner = EclRunner.getInstance();
             long startTimeEclRunner = System.nanoTime();
 
-            eclRunner.run("structural.similarity.ecl", ecoreModelHandler.discoverModelPath());
+            eclRunner.run(eclConfig, ecoreModelHandler.discoverModelPath());
             long endTimeEclRunner = System.nanoTime();
 
             logger.info("Ecl runner execution time in seconds: " + ((endTimeEclRunner - startTimeEclRunner)/ 1000000000)+ " s");

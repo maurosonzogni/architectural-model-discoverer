@@ -52,7 +52,15 @@ public class Utils {
         return emfModel;
     }
 
-    public static void writeMatrixToCSV(List<String[]> lines, String folderPath, String fileName) throws IOException {
+    /**
+     * Get as input a list of string[] and write them on a specified csv row by row
+     * 
+     * @param lines
+     * @param folderPath
+     * @param fileName
+     * @throws IOException
+     */
+    public static void writeToCSV(List<String[]> lines, String folderPath, String fileName) throws IOException {
 
         Path path = Paths.get(folderPath);
         // create folder if not already exists
@@ -74,18 +82,15 @@ public class Utils {
         try {
             for (String[] line : lines) {
                 writer.writeNext(line);
-
             }
             // closing writer connection
             writer.close();
 
         } catch (Exception error) {
             logger.error(error.getMessage());
-
         }
 
     }
-
 
     /**
      * This method take in input a 2dArray and print it in console
