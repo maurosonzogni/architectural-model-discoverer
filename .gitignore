@@ -37,3 +37,7 @@ models/github
 # cache
 storage/
 storage
+
+#
+report/
+report
