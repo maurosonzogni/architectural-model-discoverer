@@ -16,8 +16,9 @@ pre {
    
     var editDistance = numberOfComponentDistance()*0.5+ numberOfConnectorDistance()*0.5;
 
-    var modelName = clearName(SecondModel!ComponentInstance.all().first().name);
-    var model2Name = clearName(FirstModel!ComponentInstance.all().first().name);
+    var firstModelName = clearName(FirstModel!ComponentInstance.all().first().name);
+    var secondModelName = clearName(SecondModel!ComponentInstance.all().first().name);
+    
 }
 
 
@@ -67,6 +68,14 @@ operation clearName(name : String): String{
             name = name.substring(5);
         }
     }
+    // Check if name length is at least 14 (_impl_Instance)
+    if (name.length() > 14){
+        // Check if last 14 char are equal to _impl_Instance
+        if(name.substring((name.length()- 14),name.length()).equalsIgnoreCase("_impl_Instance")){
+            // Trim _impl_Instance
+            name = name.substring(0, (name.length()- 14));
+        }
+    }
     return name;
 }
 
@@ -97,6 +106,3 @@ MATRIX(using only example models)
 Execution time ~ 2 seconds
 
 */
-
-
-
