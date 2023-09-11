@@ -15,6 +15,9 @@ pre {
     info();
    
     var editDistance = numberOfComponentDistance()*0.5+ numberOfConnectorDistance()*0.5;
+
+    var modelName = clearName(SecondModel!ComponentInstance.all().first().name);
+    var model2Name = clearName(FirstModel!ComponentInstance.all().first().name);
 }
 
 

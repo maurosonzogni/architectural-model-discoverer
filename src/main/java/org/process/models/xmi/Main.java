@@ -3,6 +3,7 @@ package org.process.models.xmi;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.discover.arch.model.Config;
+import org.utils.Utils;
 
 public class Main {
 
@@ -31,7 +32,7 @@ public class Main {
              * ecoreModelHandler.generateCSVFileFromProcessedModels("results");
              */
 
-            // TEST ECL
+            // ECL
             logger.info("INIZIO FASE ECL");
 
             EclRunner eclRunner = EclRunner.getInstance();
@@ -41,6 +42,7 @@ public class Main {
             long endTimeEclRunner = System.nanoTime();
 
             logger.info("Ecl runner execution time in seconds: " + ((endTimeEclRunner - startTimeEclRunner)/ 1000000000)+ " s");
+
 
         } catch (Exception e) {
             logger.info("Main@main -> ERROR: " + e.getMessage());

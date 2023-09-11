@@ -1,9 +1,19 @@
 package org.utils;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.eclipse.epsilon.emc.emf.EmfModel;
 import org.eclipse.epsilon.eol.exceptions.models.EolModelLoadingException;
+
+import com.opencsv.CSVWriter;
 
 public class Utils {
 
@@ -41,6 +51,41 @@ public class Utils {
 
         return emfModel;
     }
+
+    public static void writeMatrixToCSV(List<String[]> lines, String folderPath, String fileName) throws IOException {
+
+        Path path = Paths.get(folderPath);
+        // create folder if not already exists
+        if (!Files.exists(path)) {
+            Files.createDirectory(path);
+        }
+        Path filePath = path.resolve(fileName);
+
+        // If file already exist delete it
+        Files.deleteIfExists(filePath.toAbsolutePath());
+
+        File file = new File(filePath.toString());
+        // create FileWriter object with file as parameter
+        FileWriter outputfile = new FileWriter(file);
+
+        // create CSVWriter object filewriter object as parameter
+        CSVWriter writer = new CSVWriter(outputfile);
+
+        try {
+            for (String[] line : lines) {
+                writer.writeNext(line);
+
+            }
+            // closing writer connection
+            writer.close();
+
+        } catch (Exception error) {
+            logger.error(error.getMessage());
+
+        }
+
+    }
+
 
     /**
      * This method take in input a 2dArray and print it in console
