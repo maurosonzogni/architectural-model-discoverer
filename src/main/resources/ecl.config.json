@@ -1,9 +1,11 @@
 {
     "eclScriptsFolderPath": "scripts/ecl",
-    "eclScriptName": "structural.similarity.test.ecl",
-    "csvFileFolderPath": "report",
-    "csvFileName": "similarity.csv",
+    "eclScriptName": "similarity.name.rule.ecl",
+    "csvFileFolderPath": "new_report",
+    "csvFileName": "similarity_name_rule_40.csv",
     "eclParams": {
-        "threshold": 0.66
+        "threshold": 0.40,
+        "componentDistanceWeigth": 0.50,
+        "connectorDistanceWeigth": 0.50
     }
 }

@@ -36,7 +36,7 @@ public class EclConfig {
         // Configure ecl params
         JSONObject eclParamsObject = eclConfiguration.getJSONObject("eclParams");
 
-        this.eclParams= new EclParams(eclParamsObject.getDouble("threshold"));
+        this.eclParams= new EclParams(eclParamsObject.getDouble("threshold"),eclParamsObject.getDouble("componentDistanceWeigth"),eclParamsObject.getDouble("connectorDistanceWeigth"));
 
     }
 

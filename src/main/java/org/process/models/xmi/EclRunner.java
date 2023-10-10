@@ -40,8 +40,14 @@ public class EclRunner {
      */
     protected void run(EclConfig eclConfig, List<String> uriList)
             throws Exception {
-
-        Variable eclParams = new Variable("threshold", eclConfig.getEclParams().getThreshold(),
+        // TODO: spostare in un metodo
+        Variable thresholdVariable = new Variable("threshold", eclConfig.getEclParams().getThreshold(),
+                EolCollectionType.Collection);
+        Variable componentDistanceWeigth = new Variable("componentDistanceWeigth",
+                eclConfig.getEclParams().getComponentDistanceWeigth(),
+                EolCollectionType.Collection);
+        Variable connectorDistanceWeigth = new Variable("connectorDistanceWeigth",
+                eclConfig.getEclParams().getConnectorDistanceWeigth(),
                 EolCollectionType.Collection);
 
         Double[][] matrix = new Double[uriList.size()][uriList.size()];
@@ -58,6 +64,7 @@ public class EclRunner {
         boolean firstTime = true;
 
         for (int i = 0; i < uriList.size(); i++) {
+            logger.info("STEP: " + i + " OF " + uriList.size());
             // We need to create a model that satisfy addModel method, for this reason we
             // use te EmfModel that implements even IModel interface
             EmfModel firstModel = Utils.createEmfModel("FirstModel", uriList.get(i), metaModelPath, true, false);
@@ -77,7 +84,8 @@ public class EclRunner {
 
                     // pass data that can be used in ecl script
                     // Maybe thresholds or others
-                    eclModule.getContext().getFrameStack().putGlobal(eclParams);
+                    eclModule.getContext().getFrameStack().putGlobal(thresholdVariable, componentDistanceWeigth,
+                            connectorDistanceWeigth);
 
                     // Add models to ecl module
                     eclModule.getContext().getModelRepository().addModel(firstModel);
@@ -120,10 +128,13 @@ public class EclRunner {
 
         }
 
-            Utils.writeToCSV(csv, eclConfig.getCsvFileFolderPath(), eclConfig.getCsvFileName());
+        Utils.writeToCSV(csv, eclConfig.getCsvFileFolderPath(), eclConfig.getCsvFileName());
 
-            Utils.print2dArray(matrix);
-        
+        // Utils.print2dArray(matrix);
+
+    }
+
+    private void setEclVariables() {
 
     }
 
