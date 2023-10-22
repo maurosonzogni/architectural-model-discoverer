@@ -1,11 +1,12 @@
 {
     "eclScriptsFolderPath": "scripts/ecl",
-    "eclScriptName": "similarity.name.rule.ecl",
-    "csvFileFolderPath": "new_report",
-    "csvFileName": "similarity_name_rule_40.csv",
+    "eclScriptName": "greedy.structural.symilarity.ecl",
+    "csvFileFolderPath": "report",
+    "csvFileName": "greedy_structural_symilarity_70.csv",
     "eclParams": {
-        "threshold": 0.40,
-        "componentDistanceWeigth": 0.50,
-        "connectorDistanceWeigth": 0.50
+        "threshold": 0.70,
+        "componentWeigth": 0.40,
+        "connectionWeigth": 0.40,
+        "featureWeigth": 0.2
     }
 }

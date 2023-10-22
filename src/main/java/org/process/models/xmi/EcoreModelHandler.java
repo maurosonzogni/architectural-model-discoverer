@@ -4,7 +4,7 @@ import com.opencsv.CSVWriter;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.discover.arch.model.Config;
+import org.config.Config;
 import org.discover.arch.model.SearchFileTraversal;
 
 import java.io.File;
@@ -36,56 +36,6 @@ public class EcoreModelHandler {
         this.qualityMetricsComputed = new ArrayList<>();
     }
 
-    public List<String> getUriModels() {
-        return uriModels;
-    }
-
-    public void setRootPathFolder(String rootPathFolder) {
-        this.rootPathFolder = rootPathFolder;
-    }
-
-    public void discoverModelFromPath() throws Exception {
-        if (rootPathFolder == null)
-            throw new Exception("There is not root path for reading the XMI models");
-        File rootPathFolderFile = Paths.get(rootPathFolder).toFile();
-        if (!rootPathFolderFile.exists())
-            throw new Exception("The path to get the xmi converted files does not exist: " + rootPathFolderFile);
-        if (!rootPathFolderFile.isDirectory())
-            throw new Exception("The file to process the xmi converted models must be a directory");
-        this.uriModels = new ArrayList<>();
-        Files.walk(Path.of(rootPathFolder)).sorted().map(Path::toFile).forEach(
-                (File file) -> {
-                    if (file.isFile()) {
-                        String uriModel = file.getPath();
-                        String ext = SearchFileTraversal.getExtension(uriModel);
-                        if (this.modelExtension.contains(ext))
-                            this.uriModels.add(file.getPath());
-                    }
-                });
-    }
-
-    // TODO: valutare dove e come mettere questo, che non è altro che il metodo
-    // precedente con un return
-    public List<String> discoverModelPath() throws Exception {
-        if (rootPathFolder == null)
-            throw new Exception("There is not root path for reading the XMI models");
-        File rootPathFolderFile = Paths.get(rootPathFolder).toFile();
-        if (!rootPathFolderFile.exists())
-            throw new Exception("The path to get the xmi converted files does not exist: " + rootPathFolderFile);
-        if (!rootPathFolderFile.isDirectory())
-            throw new Exception("The file to process the xmi converted models must be a directory");
-        List<String> uris = new ArrayList<>();
-        Files.walk(Path.of(rootPathFolder)).sorted().map(Path::toFile).forEach(
-                (File file) -> {
-                    if (file.isFile()) {
-                        String uriModel = file.getPath();
-                        String ext = SearchFileTraversal.getExtension(uriModel);
-                        if (this.modelExtension.contains(ext))
-                            uris.add(file.getPath());
-                    }
-                });
-        return uris;
-    }
 
     public void processModels(QueryModel eolBasedModelQuery, QueryModel javaBasedModelQuery) {
         logger.info("EcoreModelHandler@processModels() -> PARSING AND GETTING THE ECORE OBJECT FROM MODELS XMI");

@@ -3,6 +3,7 @@ package org.discover.arch.model;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.config.Config;
 
 public class Main {
     private static Config config = null;

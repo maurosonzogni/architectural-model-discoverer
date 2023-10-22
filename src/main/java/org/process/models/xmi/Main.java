@@ -1,9 +1,13 @@
 package org.process.models.xmi;
 
+import java.nio.file.Paths;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.config.Config;
 import org.config.EclConfig;
-import org.discover.arch.model.Config;
+
+import org.utils.Utils;
 
 public class Main {
 
@@ -17,7 +21,7 @@ public class Main {
 
             EclConfig eclConfig = new EclConfig();
 
-            EcoreModelHandler ecoreModelHandler = new EcoreModelHandler(config);
+            //EcoreModelHandler ecoreModelHandler = new EcoreModelHandler(config);
 
             /*
              * scommentare
@@ -38,9 +42,12 @@ public class Main {
             logger.info("INIZIO FASE ECL");
 
             EclRunner eclRunner = EclRunner.getInstance();
+            
             long startTimeEclRunner = System.nanoTime();
 
-            eclRunner.run(eclConfig, ecoreModelHandler.discoverModelPath());
+            eclRunner.run(eclConfig, Utils.discoverModelFromPath(Paths.get(config.getRootPath(), config.getOutputFolderName(), "xmi")
+                .toString(),config.getModelExtension()));
+
             long endTimeEclRunner = System.nanoTime();
 
             logger.info("Ecl runner execution time in seconds: " + ((endTimeEclRunner - startTimeEclRunner)/ 1000000000)+ " s");

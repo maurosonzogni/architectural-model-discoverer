@@ -10,10 +10,15 @@ import java.util.List;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.config.EclConfig;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.epsilon.ecl.EclModule;
+import org.eclipse.epsilon.ecl.trace.MatchTrace;
 import org.eclipse.epsilon.emc.emf.EmfModel;
 import org.eclipse.epsilon.eol.execute.context.Variable;
 import org.eclipse.epsilon.eol.types.EolCollectionType;
+import org.osate.aadl2.instance.InstancePackage;
+import org.osate.aadl2.util.Aadl2ResourceFactoryImpl;
 import org.utils.Utils;
 
 import lombok.NoArgsConstructor;
@@ -25,10 +30,17 @@ public class EclRunner {
 
     private final static Logger logger = LogManager.getLogger(EclRunner.class);
 
+    /**
+     * 
+     * @return EclRunner
+     */
     static public EclRunner getInstance() {
         if (INSTANCE == null) {
             INSTANCE = new EclRunner();
         }
+        Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put("aaxl2", new Aadl2ResourceFactoryImpl());
+        Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put("xmi", new XMIResourceFactoryImpl());
+        InstancePackage.eINSTANCE.eClass();
         return INSTANCE;
     }
 
@@ -40,28 +52,23 @@ public class EclRunner {
      */
     protected void run(EclConfig eclConfig, List<String> uriList)
             throws Exception {
-        // TODO: spostare in un metodo
+
         Variable thresholdVariable = new Variable("threshold", eclConfig.getEclParams().getThreshold(),
-                EolCollectionType.Collection);
-        Variable componentDistanceWeigth = new Variable("componentDistanceWeigth",
-                eclConfig.getEclParams().getComponentDistanceWeigth(),
-                EolCollectionType.Collection);
-        Variable connectorDistanceWeigth = new Variable("connectorDistanceWeigth",
-                eclConfig.getEclParams().getConnectorDistanceWeigth(),
                 EolCollectionType.Collection);
 
         Double[][] matrix = new Double[uriList.size()][uriList.size()];
+
         // Same as eol runner
         Path eclFileFolderPath = Paths.get(eclConfig.getEclScriptsFolderPath()).toAbsolutePath();
+
         String eclFilePath = eclFileFolderPath.resolve(eclConfig.getEclScriptName()).toString();
+
         String metaModelPath = Paths.get("ecore", "aadl2_inst.ecore").toAbsolutePath().toString();
 
         List<String[]> csv = new ArrayList<>();
 
         // create a new ArrayList for csv header
         List<String> headers = new ArrayList<String>(Arrays.asList("model_name"));
-
-        boolean firstTime = true;
 
         for (int i = 0; i < uriList.size(); i++) {
             logger.info("STEP: " + i + " OF " + uriList.size());
@@ -72,34 +79,45 @@ public class EclRunner {
             List<String> csvRow = new ArrayList<String>();
 
             for (int j = 0; j < uriList.size(); j++) {
+                // Initialize ecl module
+                EclModule eclModule = new EclModule();
+                // parse ecl file
+                eclModule.parse(new File(eclFilePath));
                 try {
-                    // TODO: capire la differenza con Ecl parallel
-                    EclModule eclModule = new EclModule();
-                    eclModule.parse(new File(eclFilePath));
 
                     EmfModel secondModel = Utils.createEmfModel("SecondModel", uriList.get(j), metaModelPath, true,
                             false);
 
-                    eclModule.parse(new File(eclFilePath));
-
                     // pass data that can be used in ecl script
                     // Maybe thresholds or others
-                    eclModule.getContext().getFrameStack().putGlobal(thresholdVariable, componentDistanceWeigth,
-                            connectorDistanceWeigth);
+                    eclModule.getContext().getFrameStack().putGlobal(thresholdVariable);
 
                     // Add models to ecl module
                     eclModule.getContext().getModelRepository().addModel(firstModel);
                     eclModule.getContext().getModelRepository().addModel(secondModel);
-                    // execute ecl module
-                    eclModule.execute();
 
-                    // Only 3 digists after 0
-                    matrix[i][j] = Math.round(
-                            (Double) eclModule.getContext().getFrameStack().get("editDistance").getValue() * 1000.0)
-                            / 1000.0;
+                    // execute ecl module
+                    MatchTrace mt = eclModule.execute();
+
+                    // check if there is at leat one match
+                    if (mt.size() > 0) {
+
+                        Double componentMetric = computeMetric(getNumberOfComponentInstances(firstModel),
+                                getNumberOfComponentInstances(secondModel),
+                                eclConfig.getEclParams().getComponentWeigth());
+                        Double connectionMetric = computeMetric(getNumberOfConnectionInstances(firstModel),
+                                getNumberOfConnectionInstances(secondModel),
+                                eclConfig.getEclParams().getConnectionWeigth());
+                        Double featureMetric = computeMetric(getNumberOfFeatureInstances(firstModel),
+                                getNumberOfFeatureInstances(secondModel), eclConfig.getEclParams().getFeatureWeigth());
+
+                        matrix[i][j] = componentMetric + connectionMetric + featureMetric;
+                    } else {
+                        matrix[i][j] = 1.0;
+                    }
 
                     // initialize csv headers with moldels name
-                    if (firstTime) {
+                    if (i == 0) {
                         // on first loop add all model names
                         String modelName = (String) eclModule.getContext().getFrameStack().get("secondModelName")
                                 .getValue();
@@ -114,15 +132,18 @@ public class EclRunner {
 
                 } catch (Exception e) {
                     logger.error("Error performing ECL script: " + e.getMessage());
+                } finally {
+                    // In any case clear ecl module context to avoid unexpected behavior
+                    eclModule.getContext().dispose();
                 }
+
             }
 
-            if (firstTime) {
+            if (i == 0) {
                 String[] headersStringsArray = Arrays.copyOf(headers.toArray(), headers.size(), String[].class);
                 csv.add(headersStringsArray);
             }
-            // TEST CSV
-            firstTime = false;
+
             String[] csvRowStringsArray = Arrays.copyOf(csvRow.toArray(), csvRow.size(), String[].class);
             csv.add(csvRowStringsArray);
 
@@ -134,7 +155,52 @@ public class EclRunner {
 
     }
 
-    private void setEclVariables() {
+    // TODO valutare posizione dei metodi
+    private long getNumberOfComponentInstances(EmfModel model) {
+        return model.allContents().stream()
+                .filter(DynamicEObjectImpl -> {
+                    if (DynamicEObjectImpl.eClass().getName().equals("ComponentInstance")
+                            || DynamicEObjectImpl.eClass().getName().equals("SystemInstance")) {
+                        return true;
+                    }
+                    return false;
+                })
+                .count();
+    }
+
+    // TODO valutare posizione dei metodi
+    private long getNumberOfConnectionInstances(EmfModel model) {
+        return model.allContents().stream()
+                .filter(DynamicEObjectImpl -> {
+                    if (DynamicEObjectImpl.eClass().getName().equals("ConnectionInstance")) {
+                        return true;
+                    }
+
+                    return false;
+                })
+                .count();
+    }
+
+    // TODO valutare posizione dei metodi
+    private long getNumberOfFeatureInstances(EmfModel model) {
+        return model.allContents().stream()
+                .filter(DynamicEObjectImpl -> {
+                    if (DynamicEObjectImpl.eClass().getName().equals("FeatureInstance")) {
+                        return true;
+                    }
+
+                    return false;
+                })
+                .count();
+    }
+
+    // non so come chiamarlo
+    private static double computeMetric(long a, long b, Double weigth) {
+        // Avoid 0 division
+        if (Math.max((double) a, (double) b) == 0) {
+            return 0.0;
+        }
+        return (Math.abs(a - b) / Math.max((double) a, (double) b)) * weigth;
 
     }
 

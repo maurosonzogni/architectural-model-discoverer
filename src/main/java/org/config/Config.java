@@ -1,11 +1,11 @@
-package org.discover.arch.model;
+package org.config;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.utils.Utils;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -21,8 +21,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-@Setter
-@Getter
+@Data
 public class Config {
     private final static String configPath = "/config.json";
     private String rootPath;
@@ -32,6 +31,7 @@ public class Config {
     private List<String> extensionsForSearching;
     private List<String> externalResources;
     private List<String> avoidFileNames;
+    private List<String> modelExtension;
 
     private List<Map<String, Object>> conversionLogs;
     private List<String> filesFound;
@@ -48,7 +48,7 @@ public class Config {
 
         logger.debug("Config@config -> Start configuration");
 
-        JSONObject config = readConfigFile();
+        JSONObject config = Utils.readJSONFile(configPath);
 
         // set root path
         this.rootPath = config.getString("rootPath");
@@ -64,15 +64,17 @@ public class Config {
         // set cache for polling
         this.timeCacheForPollingFromExternalResources = config
                 .getInt("timeCacheForPollingFromExternalResources");
+                // set file names to avoid
+        this.modelExtension= Utils.fromJSONArrayToArrayList(config.getJSONArray("modelExtension"));
 
         // set archives for searching
-        this.archivesForSearching = this.fromJSONArrayToArrayList(config.getJSONArray("archivesForSearching"));
+        this.archivesForSearching = Utils.fromJSONArrayToArrayList(config.getJSONArray("archivesForSearching"));
         // set extension for searching
-        this.extensionsForSearching = this.fromJSONArrayToArrayList(config.getJSONArray("extensionsForSearching"));
+        this.extensionsForSearching = Utils.fromJSONArrayToArrayList(config.getJSONArray("extensionsForSearching"));
         // set external resources
-        this.externalResources = this.fromJSONArrayToArrayList(config.getJSONArray("externalResources"));
+        this.externalResources = Utils.fromJSONArrayToArrayList(config.getJSONArray("externalResources"));
         // set file names to avoid
-        this.avoidFileNames = this.fromJSONArrayToArrayList(config.getJSONArray("avoidFileNames"));
+        this.avoidFileNames = Utils.fromJSONArrayToArrayList(config.getJSONArray("avoidFileNames"));
 
         logger.debug("Config@Config() -> End configuartion");
 
@@ -83,40 +85,7 @@ public class Config {
         this.loadCache();
     }
 
-    /**
-     * Method that take in input a json array and return an array list
-     * TODO: move in utilities class?
-     * 
-     * @param jsonArray
-     * @return List<String>
-     */
-    private List<String> fromJSONArrayToArrayList(JSONArray jsonArray) {
-        // initialize new array list
-        List<String> arrayList = new ArrayList<String>();
-        for (int i = 0; i < jsonArray.length(); i++) {
-            arrayList.add(jsonArray.getString(i));
-        }
-        return arrayList;
-    }
-
-    /**
-     * Read config file frome the specified location
-     * 
-     * @return
-     * @throws Exception
-     */
-    private static JSONObject readConfigFile() throws Exception {
-        logger.debug("Config@readConfigFile()-> Read configuration file");
-        // read config file from config path
-        InputStream is = Config.class.getResourceAsStream(configPath);
-        if (is == null) {
-            throw new NullPointerException("Cannot find resource file " + configPath);
-        }
-        JSONTokener tokener = new JSONTokener(is);
-        JSONObject data = new JSONObject(tokener);
-        return data;
-    }
-
+   
     /**
      * Try to create a file in root path defined in the config.json file
      * 

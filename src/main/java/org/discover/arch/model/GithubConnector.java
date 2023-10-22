@@ -1,5 +1,6 @@
 package org.discover.arch.model;
 
+import org.config.Config;
 import org.eclipse.jgit.api.Git;
 
 import java.io.File;

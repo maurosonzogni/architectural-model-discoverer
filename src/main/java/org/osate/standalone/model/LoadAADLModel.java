@@ -4,7 +4,7 @@ import com.google.inject.Injector;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.discover.arch.model.Config;
+import org.config.Config;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;

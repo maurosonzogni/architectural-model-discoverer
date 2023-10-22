@@ -1,6 +1,7 @@
 package org.osate.standalone.model;
 
-import org.discover.arch.model.Config;
+
+import org.config.Config;
 import org.eclipse.emf.ecore.resource.Resource;
 
 import java.util.List;

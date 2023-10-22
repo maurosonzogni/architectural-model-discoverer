@@ -1,16 +1,18 @@
 package org.osate.standalone.model;
 
-import org.discover.arch.model.Config;
+
 
 import java.io.File;
 import java.util.*;
+
+import org.config.Config;
 
 public class CrossReferenceResolver {
     static final String FOUND_FILES = "FOUND_FILES";
     static final String DOC_FILES = "DOC_FILES";
     static final List<String> docFilesExtensions = new ArrayList<>(Arrays.asList("md", "txt", "MD", "TXT"));
 
-    static Map<String, Object> resolveDown(String path, Config configObj) {
+    static Map<String, Object> resolveDown(String path,Config configObj) {
         Map<String, Object> dataOutput = new HashMap<>();
         List<String> foundFiles = new ArrayList<>();
         List<String> docFiles = new ArrayList<>();

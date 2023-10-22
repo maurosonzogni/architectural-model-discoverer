@@ -8,6 +8,8 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.config.Config;
+
 public class SearchFileTraversal {
     String rootPath;
     String folderOutputName;

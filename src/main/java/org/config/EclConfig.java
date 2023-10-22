@@ -1,17 +1,14 @@
 package org.config;
 
-import java.io.InputStream;
-
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
-import org.json.JSONTokener;
+import org.utils.Utils;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+
+@Data
 public class EclConfig {
 
     private final static String eclConfigFilePath = "/ecl.config.json";
@@ -26,7 +23,7 @@ public class EclConfig {
     
 
     public EclConfig() throws Exception {
-        JSONObject eclConfiguration = readEclConfigurationFile();
+        JSONObject eclConfiguration = Utils.readJSONFile(eclConfigFilePath);
         //
         this.eclScriptsFolderPath = eclConfiguration.getString("eclScriptsFolderPath");
         this.eclScriptName = eclConfiguration.getString("eclScriptName");
@@ -36,27 +33,10 @@ public class EclConfig {
         // Configure ecl params
         JSONObject eclParamsObject = eclConfiguration.getJSONObject("eclParams");
 
-        this.eclParams= new EclParams(eclParamsObject.getDouble("threshold"),eclParamsObject.getDouble("componentDistanceWeigth"),eclParamsObject.getDouble("connectorDistanceWeigth"));
+        this.eclParams= new EclParams(eclParamsObject.getDouble("threshold"),eclParamsObject.getDouble("componentWeigth"),eclParamsObject.getDouble("connectionWeigth"), eclParamsObject.getDouble("featureWeigth"));
 
     }
 
-    /**
-     * Read configuration file from the specified location
-     * 
-     * @return
-     * @throws Exception
-     */
-    private static JSONObject readEclConfigurationFile() throws Exception {
-
-        logger.debug("EclConfig@readEclConfigurationFile()-> Reading configuration file");
-        // read config file from config path
-        InputStream inputStream = EclConfig.class.getResourceAsStream(eclConfigFilePath);
-        if (inputStream == null) {
-            throw new NullPointerException("Cannot find resource file " + eclConfigFilePath);
-        }
-        JSONTokener tokener = new JSONTokener(inputStream);
-        JSONObject configuration = new JSONObject(tokener);
-        return configuration;
-    }
+    
 
 }
