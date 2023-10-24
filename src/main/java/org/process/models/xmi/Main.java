@@ -19,39 +19,39 @@ public class Main {
         try {
             Config config = new Config();
 
+
+
+            EcoreModelHandler ecoreModelHandler = new EcoreModelHandler(config);
+
+            EolRunner eolRunner = EolRunner.getInstance();
+
+            JavaQueryAADLModelInst javaQueryAADLModelInst = JavaQueryAADLModelInst.getInstance();
+
+            config.loadJSONFilesGeneratedByDiscoveringPhase();
+            ecoreModelHandler.processModels(eolRunner, javaQueryAADLModelInst);
+
+            ecoreModelHandler.generateCSVFileFromProcessedModels("results");
+
+            
             EclConfig eclConfig = new EclConfig();
 
-            //EcoreModelHandler ecoreModelHandler = new EcoreModelHandler(config);
+            // Perform only if ECL is enabled, disabled by default
+            if (eclConfig.getEnabled()) {
+                logger.info("INIZIO FASE ECL");
 
-            /*
-             * scommentare
-             * 
-             * EolRunner eolRunner = EolRunner.getInstance();
-             * 
-             * JavaQueryAADLModelInst javaQueryAADLModelInst =
-             * JavaQueryAADLModelInst.getInstance();
-             * 
-             * ecoreModelHandler.discoverModelFromPath();
-             * config.loadJSONFilesGeneratedByDiscoveringPhase();
-             * ecoreModelHandler.processModels(eolRunner, javaQueryAADLModelInst);
-             * 
-             * ecoreModelHandler.generateCSVFileFromProcessedModels("results");
-             */
+                EclRunner eclRunner = EclRunner.getInstance();
 
-            // ECL
-            logger.info("INIZIO FASE ECL");
+                long startTime = System.nanoTime();
 
-            EclRunner eclRunner = EclRunner.getInstance();
-            
-            long startTimeEclRunner = System.nanoTime();
+                eclRunner.run(eclConfig,
+                        Utils.discoverModelFromPath(Paths.get(config.getRootPath(), config.getOutputFolder(), "xmi")
+                                .toString(), config.getModelExtension()));
 
-            eclRunner.run(eclConfig, Utils.discoverModelFromPath(Paths.get(config.getRootPath(), config.getOutputFolderName(), "xmi")
-                .toString(),config.getModelExtension()));
+                long endTime = System.nanoTime();
 
-            long endTimeEclRunner = System.nanoTime();
-
-            logger.info("Ecl runner execution time in seconds: " + ((endTimeEclRunner - startTimeEclRunner)/ 1000000000)+ " s");
-
+                logger.info("Ecl runner execution time in seconds: "
+                        + ((endTime - startTime) / 1000000000) + " s");
+            }
 
         } catch (Exception e) {
             logger.info("Main@main -> ERROR: " + e.getMessage());

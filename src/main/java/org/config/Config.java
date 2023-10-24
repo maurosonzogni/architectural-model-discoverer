@@ -2,7 +2,6 @@ package org.config;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.utils.Utils;
 
 import lombok.Data;
@@ -10,7 +9,6 @@ import lombok.Data;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,8 +23,8 @@ import org.apache.log4j.Logger;
 public class Config {
     private final static String configPath = "/config.json";
     private String rootPath;
-    private String outputFolderName;
-    private String ecoreRequiredFilesFolder;
+    private String outputFolder;
+    private String ecoreFolder;
     private List<String> archivesForSearching;
     private List<String> extensionsForSearching;
     private List<String> externalResources;
@@ -55,15 +53,13 @@ public class Config {
         // check fot root path
         this.validateRootPath();
         // set output folder
-        this.outputFolderName = config.getString("outputFolderName");
+        this.outputFolder = config.getString("outputFolder");
         // set ecore files folder
-        this.ecoreRequiredFilesFolder = config.getString("ecoreRequiredFilesFolder");
+        this.ecoreFolder = config.getString("ecoreFolder");
         // set cache for discovering
-        this.timeCacheForDiscoveringSearchOverFilesInSeconds = config
-                .getInt("timeCacheForDiscoveringSearchOverFilesInSeconds");
+        this.timeCacheForDiscoveringSearchOverFilesInSeconds = config.getInt("timeCacheForDiscoveringSearchOverFilesInSeconds");
         // set cache for polling
-        this.timeCacheForPollingFromExternalResources = config
-                .getInt("timeCacheForPollingFromExternalResources");
+        this.timeCacheForPollingFromExternalResources = config.getInt("timeCacheForPollingFromExternalResources");
                 // set file names to avoid
         this.modelExtension= Utils.fromJSONArrayToArrayList(config.getJSONArray("modelExtension"));
 
@@ -133,7 +129,7 @@ public class Config {
         }
 
         
-        File file = Paths.get(this.rootPath, this.outputFolderName).toFile();
+        File file = Paths.get(this.rootPath, this.outputFolder).toFile();
         file.mkdir();
         for (File childFile : Objects.requireNonNull(file.listFiles())) {
             deleteDirectory(childFile.toPath());
@@ -158,7 +154,7 @@ public class Config {
     }
 
     public void loadJSONFilesGeneratedByDiscoveringPhase() {
-        Path outputPathFolder = Paths.get(this.rootPath, this.outputFolderName).toAbsolutePath();
+        Path outputPathFolder = Paths.get(this.rootPath, this.outputFolder).toAbsolutePath();
         File conversionLogsFile = outputPathFolder.resolve("conversion-logs.json").toFile();
         File filesFoundFile = outputPathFolder.resolve("files-found.txt").toFile();
         File reportsLogsFile = outputPathFolder.resolve("reports-logs.json").toFile();

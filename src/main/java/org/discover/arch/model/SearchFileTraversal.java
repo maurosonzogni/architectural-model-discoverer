@@ -30,7 +30,7 @@ public class SearchFileTraversal {
         this.rootPath = this.configObj.getRootPath();
         this.searchPaths = this.configObj.getArchivesForSearching();
         this.extensions = this.configObj.getExtensionsForSearching();
-        this.folderOutputName = this.configObj.getOutputFolderName();
+        this.folderOutputName = this.configObj.getOutputFolder();
         try {
             Path previousFoundFiles = Paths.get(this.configObj.getRootPath(), ".files-found.txt").toAbsolutePath();
             this.dataFilesFound.addAll(Files.readAllLines(previousFoundFiles));

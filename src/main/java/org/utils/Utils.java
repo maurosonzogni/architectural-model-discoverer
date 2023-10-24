@@ -19,10 +19,12 @@ import org.eclipse.epsilon.eol.exceptions.models.EolModelLoadingException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.osate.contribution.sei.arinc653.StateInformationType;
 
 import com.opencsv.CSVWriter;
-
+/**
+ * @author Mauro Sonzogni
+ * 
+ */
 public class Utils {
 
     private final static Logger logger = LogManager.getLogger(Utils.class);

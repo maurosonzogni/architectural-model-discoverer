@@ -45,7 +45,7 @@ public class ArchModelConverter {
             String extension = SearchFileTraversal.getExtension(pathFile);
             File file = new File(pathFile);
             Path originalPath = Paths.get(pathFile);
-            Path copied = Paths.get(Paths.get(this.configObj.getRootPath(), this.configObj.getOutputFolderName(), extension, id + "_" + file.getName()).toString());
+            Path copied = Paths.get(Paths.get(this.configObj.getRootPath(), this.configObj.getOutputFolder(), extension, id + "_" + file.getName()).toString());
             Files.copy(originalPath, copied, StandardCopyOption.REPLACE_EXISTING);
             id++;
         }
@@ -62,7 +62,7 @@ public class ArchModelConverter {
     void loggingConvertingResult() throws Exception {
         String jsonStr = this.logsOutput.toString(2); //TODO: This is impacting the heap memory
         try {
-            FileWriter fw = new FileWriter(Paths.get(this.configObj.getRootPath(), this.configObj.getOutputFolderName(), "conversion-logs.json").toString());
+            FileWriter fw = new FileWriter(Paths.get(this.configObj.getRootPath(), this.configObj.getOutputFolder(), "conversion-logs.json").toString());
             fw.write(jsonStr);
             fw.close();
         } catch (Exception e) {
@@ -73,7 +73,7 @@ public class ArchModelConverter {
             var jsonObject = new JSONObject(reports);
             jsonStr = jsonObject.toString(2);
             System.out.println(jsonObject);
-            FileWriter fw = new FileWriter(Paths.get(this.configObj.getRootPath(), this.configObj.getOutputFolderName(), "reports-logs.json").toString());
+            FileWriter fw = new FileWriter(Paths.get(this.configObj.getRootPath(), this.configObj.getOutputFolder(), "reports-logs.json").toString());
             fw.write(jsonStr);
             fw.close();
         } catch (Exception e) {
@@ -117,7 +117,7 @@ public class ArchModelConverter {
 
     void createCSVOfError() {
         try {
-            File file = Paths.get(this.configObj.getRootPath(), this.configObj.getOutputFolderName(), "error-info.csv").toFile();
+            File file = Paths.get(this.configObj.getRootPath(), this.configObj.getOutputFolder(), "error-info.csv").toFile();
             FileWriter outputFile = new FileWriter(file);
             CSVWriter writer = new CSVWriter(outputFile);
             String[] header = {"model_name", "src_path", "is_parsed", "ref_resolving_error", "syntax_error", "error_codes"};
@@ -161,7 +161,7 @@ public class ArchModelConverter {
     }
 
     public void analyzeFileAndConvert(String pathToModelOrFolder) throws Exception {
-        String outPathXMI = Paths.get(this.configObj.getRootPath(), this.configObj.getOutputFolderName(), "xmi").toAbsolutePath().toString()+ "\\";
+        String outPathXMI = Paths.get(this.configObj.getRootPath(), this.configObj.getOutputFolder(), "xmi").toAbsolutePath().toString()+ "\\";
         
         File fileSrc = new File(pathToModelOrFolder);
         Map<String, Object> dataOutput = convertModelsUsingClass(pathToModelOrFolder, outPathXMI, fileSrc.getName());

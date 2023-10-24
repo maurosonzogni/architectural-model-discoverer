@@ -5,12 +5,10 @@ import com.opencsv.CSVWriter;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.config.Config;
-import org.discover.arch.model.SearchFileTraversal;
+import org.utils.Utils;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -18,21 +16,16 @@ import java.util.stream.Collectors;
 
 public class EcoreModelHandler {
     private List<String> uriModels;
-    private String rootPathFolder;
-    private final List<String> modelExtension;
     private Map<String, Map<String, Object>> processedDataFromModel;
     private List<String> qualityMetricsComputed;
     private Config configObj = null;
 
     private final static Logger logger = LogManager.getLogger(EcoreModelHandler.class);
 
-    public EcoreModelHandler(Config configObj) {
+    public EcoreModelHandler(Config configObj) throws Exception {
         this.configObj = configObj;
-        this.uriModels = new ArrayList<>();
-        this.modelExtension = Arrays.asList("xml", "xmi", "ecore", "aaxl2");
+        this.uriModels = Utils.discoverModelFromPath(Paths.get(configObj.getRootPath(), configObj.getOutputFolder(), "xmi").toString(), configObj.getModelExtension());
         this.processedDataFromModel = new HashMap<>();
-        this.rootPathFolder = Paths.get(this.configObj.getRootPath(), this.configObj.getOutputFolderName(), "xmi")
-                .toString();
         this.qualityMetricsComputed = new ArrayList<>();
     }
 

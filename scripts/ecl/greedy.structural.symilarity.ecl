@@ -17,8 +17,9 @@ rule CompareByName
         // check if category are equals, that's avoid to compare SW  with HW 
         guard : firstModel.category.toString().equalsIgnoreCase(secondModel.category.toString())  
         // levenshtein.distance return 0.0 if the passed string are equals
-        compare: true//levenshtein.distance(clearName(firstModel.name),clearName(secondModel.name)) < threshold
+        compare: levenshtein.distance(clearName(firstModel.name),clearName(secondModel.name)) < threshold
         do {
+            firstModel.componentInstance.name.println();
             "DO...".println();
         }
 

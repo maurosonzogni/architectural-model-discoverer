@@ -1,8 +1,9 @@
 {
+    "enabled": true,
     "eclScriptsFolderPath": "scripts/ecl",
-    "eclScriptName": "greedy.structural.symilarity.ecl",
+    "eclScriptName": "bi.rule.structural.similarity.ecl",
     "csvFileFolderPath": "report",
-    "csvFileName": "greedy_structural_symilarity_70.csv",
+    "csvFileName": "bi_rule_structural_symilarity_70.csv",
     "eclParams": {
         "threshold": 0.70,
         "componentWeigth": 0.40,

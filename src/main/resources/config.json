@@ -1,17 +1,26 @@
 {
+  "rootPath": "models",
+
+  "ecoreFolder": "ecore",
+
+  "extensionsForSearching": ["aadl"],
+
   "archivesForSearching": ["models/raw-models"],
+
+  "outputFolder": "output-processing",
+  
+  "modelExtension": ["xml", "xmi", "ecore", "aaxl2"],
+
+  
   "avoidFileNames": [
     ".git",
     ".gitignore",
     ".project"
   ],
   "timeCacheForDiscoveringSearchOverFilesInSeconds": 30,
-  "extensionsForSearching": ["aadl"],
   "timeCacheForPollingFromExternalResources": 300,
-  "ecoreRequiredFilesFolder": "ecore",
-  "rootPath": "models",
-  "outputFolderName": "output-processing",
-  "modelExtension": ["xml", "xmi", "ecore", "aaxl2"],
+
+ 
   "externalResources": ["https://github.com/OpenAADL/ocarina",
   "https://github.com/OpenAADL/AADLib",
   "https://github.com/cmu-sei/AASPE",
