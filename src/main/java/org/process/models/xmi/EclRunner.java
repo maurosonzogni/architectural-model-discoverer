@@ -97,7 +97,7 @@ public class EclRunner {
             List<String> csvRow = new ArrayList<String>();
 
             for (int j = 0; j < uriList.size(); j++) {
-                logger.info("INTERNAL STEP: " + j + " OF " + uriList.size());
+                // logger.info("INTERNAL STEP: " + j + " OF " + uriList.size());
                 // Initialize ecl module
                 EclModule eclModule = new EclModule();
                 // parse ecl file
@@ -109,39 +109,21 @@ public class EclRunner {
 
                     // pass data that can be used in ecl script
                     // Maybe thresholds or others
-                    eclModule.getContext().getFrameStack().putGlobal(thresholdVariable, componentWeigth,connectionWeigth,featureWeigth, flowSpecificationWeigth);
+                    eclModule.getContext().getFrameStack().putGlobal(thresholdVariable, componentWeigth,
+                            connectionWeigth, featureWeigth, flowSpecificationWeigth);
 
                     // Add models to ecl module
                     eclModule.getContext().getModelRepository().addModel(firstModel);
                     eclModule.getContext().getModelRepository().addModel(secondModel);
 
                     // execute ecl module
-                    MatchTrace mt = eclModule.execute();
+                    eclModule.execute();
 
-                    // check if there is at leat one match
-                    if (mt.size() > 0 && mt.getReduced().size() > 0) {
+                    Double structuralDistance = (Double) eclModule.getContext().getFrameStack()
+                            .get("structuralDistance")
+                            .getValue();
 
-                        /*Double componentMetric = computeMetric(getNumberOfComponentInstances(firstModel),
-                                getNumberOfComponentInstances(secondModel),
-                                eclConfig.getEclParams().getComponentWeigth());
-                        Double connectionMetric = computeMetric(getNumberOfConnectionInstances(firstModel),
-                                getNumberOfConnectionInstances(secondModel),
-                                eclConfig.getEclParams().getConnectionWeigth());
-                        Double featureMetric = computeMetric(getNumberOfFeatureInstances(firstModel),
-                                getNumberOfFeatureInstances(secondModel), eclConfig.getEclParams().getFeatureWeigth());*/
-                        Double structuralDistance = (Double) eclModule.getContext().getFrameStack().get("structuralDistance")
-                                .getValue();
-
-                        logger.info("component: " + getNumberOfComponentInstances(secondModel));
-                        logger.info("Connection: " + getNumberOfConnectionInstances(secondModel));
-
-                        matrix[i][j] = structuralDistance;
-                    } else {
-                        logger.info("Passato di qui con 1: ");
-                        logger.info((Double) eclModule.getContext().getFrameStack().get("structuralDistance")
-                                .getValue());
-                        matrix[i][j] = 1.0;
-                    }
+                    matrix[i][j] = structuralDistance;
 
                     // initialize csv headers with moldels name
                     if (i == 0) {
