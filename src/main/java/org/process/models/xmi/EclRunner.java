@@ -97,7 +97,7 @@ public class EclRunner {
             List<String> csvRow = new ArrayList<String>();
 
             for (int j = 0; j < uriList.size(); j++) {
-                // logger.info("INTERNAL STEP: " + j + " OF " + uriList.size());
+                logger.info("INTERNAL STEP: " + j + " OF " + uriList.size());
                 // Initialize ecl module
                 EclModule eclModule = new EclModule();
                 // parse ecl file
@@ -164,53 +164,5 @@ public class EclRunner {
 
     }
 
-    // TODO valutare posizione dei metodi
-    private long getNumberOfComponentInstances(EmfModel model) {
-        return model.allContents().stream()
-                .filter(DynamicEObjectImpl -> {
-                    if (DynamicEObjectImpl.eClass().getName().equals("ComponentInstance")
-                            || DynamicEObjectImpl.eClass().getName().equals("SystemInstance")) {
-                        return true;
-                    }
-                    return false;
-                })
-                .count();
-    }
-
-    // TODO valutare posizione dei metodi
-    private long getNumberOfConnectionInstances(EmfModel model) {
-        return model.allContents().stream()
-                .filter(DynamicEObjectImpl -> {
-                    if (DynamicEObjectImpl.eClass().getName().equals("ConnectionInstance")) {
-                        return true;
-                    }
-
-                    return false;
-                })
-                .count();
-    }
-
-    // TODO valutare posizione dei metodi
-    private long getNumberOfFeatureInstances(EmfModel model) {
-        return model.allContents().stream()
-                .filter(DynamicEObjectImpl -> {
-                    if (DynamicEObjectImpl.eClass().getName().equals("FeatureInstance")) {
-                        return true;
-                    }
-
-                    return false;
-                })
-                .count();
-    }
-
-    // non so come chiamarlo
-    private static double computeMetric(long a, long b, Double weigth) {
-        // Avoid 0 division
-        if (Math.max((double) a, (double) b) == 0 || weigth == 0) {
-            return 0.0;
-        }
-        return (Math.abs(a - b) / Math.max((double) a, (double) b)) * weigth;
-
-    }
 
 }
