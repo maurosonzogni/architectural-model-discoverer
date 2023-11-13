@@ -1,13 +1,14 @@
-{
+{   
     "enabled": true,
     "eclScriptsFolderPath": "scripts/ecl",
-    "eclScriptName": "bi.rule.structural.similarity.ecl",
+    "eclScriptName": "first.level.structural.similarity.or.rule.ecl",
     "csvFileFolderPath": "report",
-    "csvFileName": "bi_rule_structural_symilarity_70.csv",
+    "csvFileName": "first.level.structural.similarity.or.rule.csv",
     "eclParams": {
-        "threshold": 0.70,
-        "componentWeigth": 0.40,
-        "connectionWeigth": 0.40,
-        "featureWeigth": 0.2
+        "threshold": 0.8,
+        "componentWeigth": 0.30,
+        "connectionWeigth": 0.30,
+        "featureWeigth": 0.2,
+        "flowSpecificationWeigth": 0.2
     }
 }

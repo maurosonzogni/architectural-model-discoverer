@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * Represents params that can be used in ecl file instead of hardcoded values.
+ * The sum of weigth variables must be equal to 1 according to in accordance with the elements to be included in the analysis.      
  * 
  * @author Mauro Sonzogni
  * 
@@ -20,21 +21,26 @@ public class EclParams {
      */
     private Double threshold = 0.5;
 
-    /* NOTE: The sum of weigth variables must be equal to 1 */
+    
 
     /**
      * The value represent the weigth assigned to the component distance on the total distance
      */
-    private Double componentWeigth = 0.4;
+    private Double componentWeigth = 0.3;
 
     /**
      * The value represent the weigth assigned to the connection distance on the total distance
      */
-    private Double connectionWeigth = 0.4;
+    private Double connectionWeigth = 0.3;
 
     /**
      * The value represent the weigth assigned to the feature distance on the total distance
      */
     private Double featureWeigth = 0.2;
+
+    /**
+     * The value represent the weigth assigned to the feature distance on the total distance
+     */
+    private Double flowSpecificationWeigth = 0.2;
 
 }

@@ -16,13 +16,21 @@ import org.eclipse.epsilon.ecl.EclModule;
 import org.eclipse.epsilon.ecl.trace.MatchTrace;
 import org.eclipse.epsilon.emc.emf.EmfModel;
 import org.eclipse.epsilon.eol.execute.context.Variable;
+import org.eclipse.epsilon.eol.types.EolAny;
+import org.eclipse.epsilon.eol.types.EolBag;
 import org.eclipse.epsilon.eol.types.EolCollectionType;
+import org.eclipse.epsilon.eol.types.EolNativeType;
+import org.eclipse.epsilon.eol.types.EolType;
 import org.osate.aadl2.instance.InstancePackage;
 import org.osate.aadl2.util.Aadl2ResourceFactoryImpl;
 import org.utils.Utils;
 
 import lombok.NoArgsConstructor;
 
+/**
+ * @author Mauro Sonzogni
+ * 
+ */
 @NoArgsConstructor
 public class EclRunner {
 
@@ -56,6 +64,16 @@ public class EclRunner {
         Variable thresholdVariable = new Variable("threshold", eclConfig.getEclParams().getThreshold(),
                 EolCollectionType.Collection);
 
+        Variable componentWeigth = new Variable("componentWeigth", eclConfig.getEclParams().getComponentWeigth(),
+                EolCollectionType.Collection);
+        Variable connectionWeigth = new Variable("connectionWeigth", eclConfig.getEclParams().getConnectionWeigth(),
+                EolCollectionType.Collection);
+        Variable featureWeigth = new Variable("featureWeigth", eclConfig.getEclParams().getFeatureWeigth(),
+                EolCollectionType.Collection);
+        Variable flowSpecificationWeigth = new Variable("flowSpecificationWeigth",
+                eclConfig.getEclParams().getFlowSpecificationWeigth(),
+                EolCollectionType.Collection);
+
         Double[][] matrix = new Double[uriList.size()][uriList.size()];
 
         // Same as eol runner
@@ -79,6 +97,7 @@ public class EclRunner {
             List<String> csvRow = new ArrayList<String>();
 
             for (int j = 0; j < uriList.size(); j++) {
+                logger.info("INTERNAL STEP: " + j + " OF " + uriList.size());
                 // Initialize ecl module
                 EclModule eclModule = new EclModule();
                 // parse ecl file
@@ -90,7 +109,7 @@ public class EclRunner {
 
                     // pass data that can be used in ecl script
                     // Maybe thresholds or others
-                    eclModule.getContext().getFrameStack().putGlobal(thresholdVariable);
+                    eclModule.getContext().getFrameStack().putGlobal(thresholdVariable, componentWeigth,connectionWeigth,featureWeigth, flowSpecificationWeigth);
 
                     // Add models to ecl module
                     eclModule.getContext().getModelRepository().addModel(firstModel);
@@ -100,19 +119,27 @@ public class EclRunner {
                     MatchTrace mt = eclModule.execute();
 
                     // check if there is at leat one match
-                    if (mt.size() > 0) {
+                    if (mt.size() > 0 && mt.getReduced().size() > 0) {
 
-                        Double componentMetric = computeMetric(getNumberOfComponentInstances(firstModel),
+                        /*Double componentMetric = computeMetric(getNumberOfComponentInstances(firstModel),
                                 getNumberOfComponentInstances(secondModel),
                                 eclConfig.getEclParams().getComponentWeigth());
                         Double connectionMetric = computeMetric(getNumberOfConnectionInstances(firstModel),
                                 getNumberOfConnectionInstances(secondModel),
                                 eclConfig.getEclParams().getConnectionWeigth());
                         Double featureMetric = computeMetric(getNumberOfFeatureInstances(firstModel),
-                                getNumberOfFeatureInstances(secondModel), eclConfig.getEclParams().getFeatureWeigth());
+                                getNumberOfFeatureInstances(secondModel), eclConfig.getEclParams().getFeatureWeigth());*/
+                        Double structuralDistance = (Double) eclModule.getContext().getFrameStack().get("structuralDistance")
+                                .getValue();
 
-                        matrix[i][j] = componentMetric + connectionMetric + featureMetric;
+                        logger.info("component: " + getNumberOfComponentInstances(secondModel));
+                        logger.info("Connection: " + getNumberOfConnectionInstances(secondModel));
+
+                        matrix[i][j] = structuralDistance;
                     } else {
+                        logger.info("Passato di qui con 1: ");
+                        logger.info((Double) eclModule.getContext().getFrameStack().get("structuralDistance")
+                                .getValue());
                         matrix[i][j] = 1.0;
                     }
 
@@ -197,7 +224,7 @@ public class EclRunner {
     // non so come chiamarlo
     private static double computeMetric(long a, long b, Double weigth) {
         // Avoid 0 division
-        if (Math.max((double) a, (double) b) == 0) {
+        if (Math.max((double) a, (double) b) == 0 || weigth == 0) {
             return 0.0;
         }
         return (Math.abs(a - b) / Math.max((double) a, (double) b)) * weigth;

@@ -17,7 +17,7 @@ public class EclConfig {
 
     private final static Logger logger = LogManager.getLogger(EclConfig.class);
 
-    //if you want to skip all ecl operation set it to true in ecl.config.json
+    // if you want to skip all ecl operation set it to true in ecl.config.json
     private Boolean enabled = false;
 
     private String eclScriptsFolderPath;
@@ -42,9 +42,35 @@ public class EclConfig {
                 // Configure ecl params
                 JSONObject eclParamsObject = eclConfiguration.getJSONObject("eclParams");
 
-                this.eclParams = new EclParams(eclParamsObject.getDouble("threshold"),
-                        eclParamsObject.getDouble("componentWeigth"), eclParamsObject.getDouble("connectionWeigth"),
-                        eclParamsObject.getDouble("featureWeigth"));
+                this.eclParams = new EclParams();
+
+                if (eclParamsObject.getDouble("threshold") > 0) {
+                    this.eclParams.setThreshold(eclParamsObject.getDouble("threshold"));
+                } else {
+                    logger.info("Threshold must be greater than 0");
+                    throw new Exception(
+                            "Threshold must be greater than 0, please check ecl.config.json file");
+                }
+
+                this.eclParams.setComponentWeigth(eclParamsObject.getDouble("componentWeigth"));
+                this.eclParams.setConnectionWeigth(eclParamsObject.getDouble("connectionWeigth"));
+                this.eclParams.setFeatureWeigth(eclParamsObject.getDouble("featureWeigth"));
+                this.eclParams.setFlowSpecificationWeigth(eclParamsObject.getDouble("flowSpecificationWeigth"));
+                // if all is false, is useless perfor analisys
+                if ((this.eclParams.getComponentWeigth() == 0) && (this.eclParams.getConnectionWeigth() == 0)
+                        && (this.eclParams.getFeatureWeigth() == 0)
+                        && (this.eclParams.getFlowSpecificationWeigth() == 0)) {
+                    logger.info("All weight are equals to 0");
+                    throw new Exception(
+                            "Please include at least one weight to perform analisys, see ecl.config.json file");
+                }
+                if ((this.eclParams.getComponentWeigth() + this.eclParams.getConnectionWeigth()
+                        + this.eclParams.getFeatureWeigth() + this.eclParams.getFlowSpecificationWeigth()) != 1) {
+                    logger.info("The sum of weight must be equal to 1 to avoid inconsistence");
+                    throw new Exception(
+                            "Please provide to fix weigths before perform analisys, see ecl.config.json file");
+                }
+
             } else {
                 logger.info(
                         "ECL operations are diasbled, if you want to enable please provide to set to true field 'enabled' in ecl.config.json");

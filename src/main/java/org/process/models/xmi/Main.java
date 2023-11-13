@@ -18,24 +18,25 @@ public class Main {
         logger.info("Main@main -> Running ECORE processing");
         try {
             Config config = new Config();
-
-
-
-            EcoreModelHandler ecoreModelHandler = new EcoreModelHandler(config);
-
-            EolRunner eolRunner = EolRunner.getInstance();
-
-            JavaQueryAADLModelInst javaQueryAADLModelInst = JavaQueryAADLModelInst.getInstance();
-
-            config.loadJSONFilesGeneratedByDiscoveringPhase();
-            ecoreModelHandler.processModels(eolRunner, javaQueryAADLModelInst);
-
-            ecoreModelHandler.generateCSVFileFromProcessedModels("results");
-
             
+              /* EcoreModelHandler ecoreModelHandler = new EcoreModelHandler(config);
+              
+              EolRunner eolRunner = EolRunner.getInstance();
+              
+              JavaQueryAADLModelInst javaQueryAADLModelInst =
+              JavaQueryAADLModelInst.getInstance();
+              
+              config.loadJSONFilesGeneratedByDiscoveringPhase();
+              ecoreModelHandler.processModels(eolRunner, javaQueryAADLModelInst);
+              
+              ecoreModelHandler.generateCSVFileFromProcessedModels("results");
+              */
+      
+
             EclConfig eclConfig = new EclConfig();
 
             // Perform only if ECL is enabled, disabled by default
+
             if (eclConfig.getEnabled()) {
                 logger.info("INIZIO FASE ECL");
 
@@ -52,6 +53,13 @@ public class Main {
                 logger.info("Ecl runner execution time in seconds: "
                         + ((endTime - startTime) / 1000000000) + " s");
             }
+            /* 
+            EgxRunner egxRunner = EgxRunner.getInstance();
+
+            egxRunner.run(eclConfig,
+                    Utils.discoverModelFromPath(Paths.get(config.getRootPath(),
+                            config.getOutputFolder(), "xmi")
+                            .toString(), config.getModelExtension()));*/
 
         } catch (Exception e) {
             logger.info("Main@main -> ERROR: " + e.getMessage());
