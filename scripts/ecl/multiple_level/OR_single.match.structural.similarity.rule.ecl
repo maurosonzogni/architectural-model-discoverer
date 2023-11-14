@@ -1,6 +1,20 @@
+/**
+* A simple ecl file that provide rules to compute model similarity.
+* To exclude specific rules from analisys is necessary edit ecl.config.json file and set to 0 the weigth of
+* element yo want to exclude.
+* The commented println() below can be usefull for debugging purpouse, in the other hand they help to increase execution time (tip: enable iff needed)
+*
+* @Author Sonzogni Mauro
+*/
+
+
+/**
+* Executed before all
+*/
 pre {
     // Import Math
     var Math = Native("java.lang.Math");
+    // Import NormalizedLevenshtein similarity
     var levenshtein = new Native("info.debatty.java.stringsimilarity.NormalizedLevenshtein");
 
     var firstModelName = clearName(FirstModel!SystemInstance.all().first().name);
@@ -14,119 +28,125 @@ pre {
     var componentMatch: Integer = 0;
     var featureMatch: Integer = 0;
     var connectionMatch: Integer = 0;
-    var flowSpecificationMatch: Integer = 0;
-    
+    var flowSpecificationMatch: Integer = 0;  
 }
 
 
 /* 
-* Check Component and Systems
+* Compare Components and/or Systems
 */
 @greedy
 rule CompareComponentsByName
     match firstModelComponents: FirstModel!ComponentInstance
     with secondModelComponents: SecondModel!ComponentInstance {
-        // check if category are equals, that's avoid to compare SW  with HW 
+        // guard is computed only on ComponentInstance and SystemInstance, the second because rule is annotated as @greedy
+        // check if componentWeigth is greater than 0 (weigth range must be (0,1])
+        // check if category of components are equals, it will be a waste of time compare for example software component with hardware component
         guard : (componentWeigth>0) and firstModelComponents.category.toString().equalsIgnoreCase(secondModelComponents.category.toString())
-        // OR compare
+        // compare is compuded only if guard expression is true
+        // check if name similarity is less than a given threshold, similarity value will be between [0,1], 0 = words are equals
         compare: levenshtein.distance(clearName(firstModelComponents.name),clearName(secondModelComponents.name)) < threshold
+        // do statement is executed only if compare expression is true
         do {
             //"DO COMPONENT...".println();
             componentMatch = componentMatch + 1;       
         }
-
 }
 
 
-
+/* 
+* Compare Features
+*/
 rule CompareFeaturesByName
     match firstModelFeatures: FirstModel!FeatureInstance
     with secondModelFeatures: SecondModel!FeatureInstance {
-        // check if category are equals, that's avoid to compare SW  with HW 
         guard : (featureWeigth>0) and firstModelFeatures.category.toString().equalsIgnoreCase(secondModelFeatures.category.toString())
-        // OR compare
         compare: levenshtein.distance(clearName(firstModelFeatures.name),clearName(secondModelFeatures.name)) < threshold
         do {
             //"DO FEATURES...".println();
             featureMatch = featureMatch + 1;       
         }
-
 }
 
+/* 
+* Compare Connections
+*/
 rule CompareConnectionsByName
     match firstModelConnections: FirstModel!ConnectionInstance
     with secondModelConnections: SecondModel!ConnectionInstance {
-        // Mettere check su kind se proprio
         guard : (connectionWeigth > 0)
-        // OR compare
         compare: levenshtein.distance(clearName(firstModelConnections.name),clearName(secondModelConnections.name)) < threshold
         do {
             //"DO CONNECTIONS...".println();
             connectionMatch = connectionMatch + 1;       
         }
-
 }
 
-rule CompareFlowSpecificationByName
+/* 
+* Compare FlowSpecifications
+*/
+rule CompareFlowSpecificationsByName
     match firstModelFlowSpecifications: FirstModel!FlowSpecification
     with secondModelFlowSpecifications: SecondModel!FlowSpecification {
-        // check if category are equals, that's avoid to compare SW  with HW 
         guard : (flowSpecificationWeigth > 0)
-        // OR compare
         compare: levenshtein.distance(clearName(firstModelFlowSpecifications.name),clearName(secondModelFlowSpecifications.name)) < threshold
         do {
-            //"DO FlowSpecification...".println();
+            //"DO FLOW SPECIFICATION...".println();
             flowSpecificationMatch = flowSpecificationMatch + 1;       
         }
-
 }
 
+/**
+* executed after all
+*/
 post {
     
     if(componentWeigth > 0){
         componentDistance = numberOfElementDistance(FirstModel!ComponentInstance.all().size(), SecondModel!ComponentInstance.all().size(), componentMatch)*componentWeigth.asDouble();
-        ("COMPONENT DISTANCE: " + componentDistance).println();
+        //("COMPONENT DISTANCE: " + componentDistance).println();
     }
     if(connectionWeigth > 0){
         connectionDistance = numberOfElementDistance(FirstModel!ConnectionInstance.all().size(), SecondModel!ConnectionInstance.all().size(), connectionMatch)*connectionWeigth.asDouble();
-        ("CONNECTION DISTANCE: " + connectionDistance).println();
+        //("CONNECTION DISTANCE: " + connectionDistance).println();
     }
     if(featureWeigth > 0){
         featureDistance = numberOfElementDistance(FirstModel!FeatureInstance.all().size(), SecondModel!FeatureInstance.all().size(), featureMatch)*featureWeigth.asDouble();
-        ("FEATURE DISTANCE: " + featureDistance).println();
+        //("FEATURE DISTANCE: " + featureDistance).println();
         
     }
     if(flowSpecificationWeigth > 0){
         flowSpecificationDistance = numberOfElementDistance(FirstModel!FlowSpecification.all().size(), SecondModel!FlowSpecification.all().size(), flowSpecificationMatch)*flowSpecificationWeigth.asDouble();
-        ("FLOW SPEC DISTANCE: " + flowSpecificationDistance).println();
-        
+        //("FLOW SPEC DISTANCE: " + flowSpecificationDistance).println(); 
     }
 
     // 0 = model are equals
     // 1 = model are complitely different.
-    var structuralDistance = 1- (componentDistance + connectionDistance + featureDistance + flowSpecificationDistance).asDouble();
-    ("STRUCTURAL DISTANCE: " + structuralDistance).println();
+    var structuralDistance = 1 - (componentDistance + connectionDistance + featureDistance + flowSpecificationDistance).asDouble();
+    //("STRUCTURAL DISTANCE: " + structuralDistance).println();
             
 }
 
 
-
-// ELEMENT
+/**
+* @param elementsFirstModel
+* @param elementsSecondModel
+* @param matchingElements
+* @return Real
+*/
 operation numberOfElementDistance(elementsFirstModel: Integer, elementsSecondModel: Integer, matchingElements: Integer): Real{
-    ("# di elementi nei modelli: "+ elementsFirstModel + " | " + elementsFirstModel).println();
-    // Avoid 0/0 division
-    // se abbiamo trovato più match vuol degli elementi di entrambi i modelli significa che potremmo avere più cose simili
-    if ((elementsFirstModel == 0 and elementsSecondModel == 0) or (matchingElements>elementsFirstModel and matchingElements>elementsSecondModel)){
+    //("# elements: "+ elementsFirstModel + " | " + elementsFirstModel).println();
+    if ((elementsFirstModel == 0 and elementsSecondModel == 0) or (matchingElements > elementsFirstModel and matchingElements > elementsSecondModel)){
         return 1.asDouble();
     }
     //
     return (matchingElements/Math.max(elementsFirstModel,elementsSecondModel)).asDouble();  
 }
 
-
-
-
-// Return the original name or the name cleared
+/**
+* Return the original name or the name cleared
+* @param name
+* @return String
+*/
 operation clearName(name : String): String{
    
     // Check if name length is at least 14 (_impl_instance)
@@ -147,8 +167,9 @@ operation clearName(name : String): String{
         } 
     }
 
+    // Check if name length is at least 9 (_Instance)
     if (name.length() > 9){
-        // Check if last 9 char are equal to _impl_Instance
+        // Check if last 9 char are equal to _Instance
         if(name.substring((name.length()- 9),name.length()).equalsIgnoreCase("_instance")){
             // Trim _instance
             name = name.substring(0, (name.length()- 9));
