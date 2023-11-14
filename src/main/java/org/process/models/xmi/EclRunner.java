@@ -20,6 +20,8 @@ import org.eclipse.epsilon.eol.types.EolAny;
 import org.eclipse.epsilon.eol.types.EolBag;
 import org.eclipse.epsilon.eol.types.EolCollectionType;
 import org.eclipse.epsilon.eol.types.EolNativeType;
+import org.eclipse.epsilon.eol.types.EolPrimitive;
+import org.eclipse.epsilon.eol.types.EolPrimitiveType;
 import org.eclipse.epsilon.eol.types.EolType;
 import org.osate.aadl2.instance.InstancePackage;
 import org.osate.aadl2.util.Aadl2ResourceFactoryImpl;
@@ -62,17 +64,16 @@ public class EclRunner {
             throws Exception {
 
         Variable thresholdVariable = new Variable("threshold", eclConfig.getEclParams().getThreshold(),
-                EolCollectionType.Collection);
+                 EolPrimitiveType.Real);
 
         Variable componentWeigth = new Variable("componentWeigth", eclConfig.getEclParams().getComponentWeigth(),
-                EolCollectionType.Collection);
+                 EolPrimitiveType.Real);
         Variable connectionWeigth = new Variable("connectionWeigth", eclConfig.getEclParams().getConnectionWeigth(),
-                EolCollectionType.Collection);
+                 EolPrimitiveType.Real);
         Variable featureWeigth = new Variable("featureWeigth", eclConfig.getEclParams().getFeatureWeigth(),
-                EolCollectionType.Collection);
+                 EolPrimitiveType.Real);
         Variable flowSpecificationWeigth = new Variable("flowSpecificationWeigth",
-                eclConfig.getEclParams().getFlowSpecificationWeigth(),
-                EolCollectionType.Collection);
+                eclConfig.getEclParams().getFlowSpecificationWeigth(), EolPrimitiveType.Real);
 
         Double[][] matrix = new Double[uriList.size()][uriList.size()];
 
