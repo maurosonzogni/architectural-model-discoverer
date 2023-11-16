@@ -4,6 +4,10 @@
 * element yo want to exclude.
 * The commented println() below can be usefull for debugging purpouse, in the other hand they help to increase execution time (tip: enable iff needed)
 *
+* NOTE: 
+* if both models don't have a specific element (ComponentInstace,ConnectionIntsance,FeatureInstance,FlowSpecification) that will be considered
+* as a "things" that they have in common
+*
 * @Author Sonzogni Mauro
 */
 
@@ -135,8 +139,12 @@ post {
 */
 operation numberOfElementDistance(elementsFirstModel: Integer, elementsSecondModel: Integer, matchingElements: Integer): Real{
     //("# elements: "+ elementsFirstModel + " | " + elementsFirstModel).println();
+    // If both models don't have a certain type of element, it is as if they have all those elements in common
     if ((elementsFirstModel == 0 and elementsSecondModel == 0) or (matchingElements > elementsFirstModel and matchingElements > elementsSecondModel)){
         return 1.asDouble();
+    }
+    if (matchingElements== 0){
+        return 0.asDouble();
     }
     //
     return (matchingElements/Math.max(elementsFirstModel,elementsSecondModel)).asDouble();  
