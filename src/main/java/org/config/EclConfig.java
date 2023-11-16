@@ -60,20 +60,19 @@ public class EclConfig {
                 if ((this.eclParams.getComponentWeigth() == 0) && (this.eclParams.getConnectionWeigth() == 0)
                         && (this.eclParams.getFeatureWeigth() == 0)
                         && (this.eclParams.getFlowSpecificationWeigth() == 0)) {
-                    logger.info("All weight are equals to 0");
+                    logger.warn("All weight are equals to 0");
                     throw new Exception(
                             "Please include at least one weight to perform analisys, see ecl.config.json file");
                 }
                 if ((this.eclParams.getComponentWeigth() + this.eclParams.getConnectionWeigth()
                         + this.eclParams.getFeatureWeigth() + this.eclParams.getFlowSpecificationWeigth()) != 1) {
-                    logger.info("The sum of weight must be equal to 1 to avoid inconsistence");
+                    logger.warn("The sum of weight must be equal to 1 to avoid inconsistence");
                     throw new Exception(
                             "Please provide to fix weigths before perform analisys, see ecl.config.json file");
                 }
 
             } else {
-                logger.info(
-                        "ECL operations are diasbled, if you want to enable please provide to set to true field 'enabled' in ecl.config.json");
+                logger.info("ECL operations are diasbled, if you want to enable please provide to set to true field 'enabled' in ecl.config.json");
 
             }
         } catch (Exception e) {

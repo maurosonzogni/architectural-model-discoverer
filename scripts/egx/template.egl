@@ -1,0 +1,12 @@
+[* NOME DEL SYSTEM/COMPONENT*]
+[%= t.name%]
+
+[%= writeName(t)%]
+
+
+[% operation writeName(t: Any) { %]
+[%if (t.hasProperty("componentInstance")) {%] [% for (component in t.componentInstance) { %][%=component.name %] [%= writeName(component)%] [% for (feature in component.featureInstance) { %][%=feature.name %] [%= writeName(feature)%] [% } %][% for (flow in component.flowSpecification) { %][%=flow.name %] [% } %] [% for (subComponent in component.componentInstance) { %][%=subComponent.name %] [% for (subFeature in subComponent.featureInstance) { %][%=subFeature.name %] [% } %][% } %] [% } %] [% }%]
+[%if (t.hasProperty("connectionInstance")) {%][% for (connection in t.connectionInstance) { %][%=connection.name %] [% } %] [% } %]
+[%if (t.hasProperty("featureInstance")) {%][% for (feature in t.featureInstance) { %][%=feature.name %] [%= writeName(feature)%] [% } %][% } %]
+[%if (t.hasProperty("flowSpecification")) {%][% for (flow in t.flowSpecification) { %][%=flow.name %] [% } %][% } %]
+[% } %]

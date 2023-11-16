@@ -1,0 +1,17 @@
+pre{
+	Model!SystemInstance.all().first().name.println();
+}
+
+/*
+*
+*/
+@parallel
+rule System2Txt transform t : SystemInstance {
+	
+	template : eglTemplateFileName
+	
+	target : index + "_" + t.name + ".txt"
+	
+}
+
+

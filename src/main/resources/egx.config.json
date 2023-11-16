@@ -1,0 +1,7 @@
+{
+    "enabled": true,
+    "egxScriptsFolderPath": "scripts/egx",
+    "egxScriptName": "model2text.egx",
+    "eglScriptName": "template.egl",
+    "outputFolderPath": "model2text"
+}

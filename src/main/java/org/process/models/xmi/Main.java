@@ -6,7 +6,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.config.Config;
 import org.config.EclConfig;
-
+import org.config.EgxConfig;
 import org.utils.Utils;
 
 public class Main {
@@ -18,20 +18,20 @@ public class Main {
         logger.info("Main@main -> Running ECORE processing");
         try {
             Config config = new Config();
-            
-              /* EcoreModelHandler ecoreModelHandler = new EcoreModelHandler(config);
-              
-              EolRunner eolRunner = EolRunner.getInstance();
-              
-              JavaQueryAADLModelInst javaQueryAADLModelInst =
-              JavaQueryAADLModelInst.getInstance();
-              
-              config.loadJSONFilesGeneratedByDiscoveringPhase();
-              ecoreModelHandler.processModels(eolRunner, javaQueryAADLModelInst);
-              
-              ecoreModelHandler.generateCSVFileFromProcessedModels("results");
-              */
-      
+
+            /*
+             * EcoreModelHandler ecoreModelHandler = new EcoreModelHandler(config);
+             * 
+             * EolRunner eolRunner = EolRunner.getInstance();
+             * 
+             * JavaQueryAADLModelInst javaQueryAADLModelInst =
+             * JavaQueryAADLModelInst.getInstance();
+             * 
+             * config.loadJSONFilesGeneratedByDiscoveringPhase();
+             * ecoreModelHandler.processModels(eolRunner, javaQueryAADLModelInst);
+             * 
+             * ecoreModelHandler.generateCSVFileFromProcessedModels("results");
+             */
 
             EclConfig eclConfig = new EclConfig();
 
@@ -53,13 +53,19 @@ public class Main {
                 logger.info("Ecl runner execution time in seconds: "
                         + ((endTime - startTime) / 1000000000) + " s");
             }
-            /* 
-            EgxRunner egxRunner = EgxRunner.getInstance();
+            
+            EgxConfig egxConfig = new EgxConfig();
+            // Perform only if EGX is enabled, disabled by default
+            if (egxConfig.getEnabled()) {
+                logger.info("INIZIO FASE EGX");
 
-            egxRunner.run(eclConfig,
-                    Utils.discoverModelFromPath(Paths.get(config.getRootPath(),
-                            config.getOutputFolder(), "xmi")
-                            .toString(), config.getModelExtension()));*/
+                EgxRunner egxRunner = EgxRunner.getInstance();
+
+                egxRunner.run(egxConfig,
+                        Utils.discoverModelFromPath(Paths.get(config.getRootPath(),
+                                config.getOutputFolder(), "xmi")
+                                .toString(), config.getModelExtension()));
+            }
 
         } catch (Exception e) {
             logger.info("Main@main -> ERROR: " + e.getMessage());
