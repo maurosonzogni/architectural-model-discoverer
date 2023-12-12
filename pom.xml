@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.discover.arch.model</groupId>
@@ -7,33 +8,21 @@
 	<version>1.0-SNAPSHOT</version>
 
 	<properties>
-<epsilon.version>2.4.0</epsilon.version>
-	    <maven.compiler.source>17</maven.compiler.source>
-    	<maven.compiler.target>17</maven.compiler.target>
+		<epsilon.version>2.4.0</epsilon.version>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
 	</properties>
 
-
 	<dependencies>
-<!-- Epsilon dependencies-->
 
-		<dependency>
-			<groupId>org.eclipse.epsilon</groupId>
-			<artifactId>org.eclipse.epsilon.egl.engine</artifactId>
-			<version>${epsilon.version}</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.eclipse.epsilon/org.eclipse.epsilon.ecl.engine -->
-		<dependency>
-			<groupId>org.eclipse.epsilon</groupId>
-			<artifactId>org.eclipse.epsilon.ecl.engine</artifactId>
-			<version>${epsilon.version}</version>
-		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.json/json -->
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20220924</version>
+			<version>20231013</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.eclipse.emf</groupId>
 			<artifactId>org.eclipse.emf.ecore</artifactId>
@@ -111,16 +100,18 @@
 			<systemPath>${project.basedir}/dependencies/org.eclipse.uml2.types_2.5.0.v20210228-1829.jar</systemPath>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/org.eclipse.xtext/org.eclipse.xtext -->
 		<dependency>
 			<groupId>org.eclipse.xtext</groupId>
 			<artifactId>org.eclipse.xtext</artifactId>
-			<version>2.28.0</version>
+			<version>2.32.0</version>
 		</dependency>
+
 
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>31.1-jre</version>
+			<version>32.1.3-jre</version>
 		</dependency>
 
 		<dependency>
@@ -140,27 +131,43 @@
 			<artifactId>org.eclipse.core.resources</artifactId>
 			<version>3.18.100</version>
 		</dependency>
+
+		<!-- Epsilon dependencies, order is important!-->
 		<dependency>
 			<groupId>org.eclipse.epsilon</groupId>
 			<artifactId>org.eclipse.epsilon.common</artifactId>
-			<version>2.4.0</version>
+			<version>${epsilon.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.epsilon</groupId>
 			<artifactId>org.eclipse.epsilon.eol.engine</artifactId>
-			<version>2.4.0</version>
+			<version>${epsilon.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.epsilon</groupId>
 			<artifactId>org.eclipse.epsilon.emc.emf</artifactId>
-			<version>2.4.0</version>
+			<version>${epsilon.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.epsilon</groupId>
+			<artifactId>org.eclipse.epsilon.egl.engine</artifactId>
+			<version>${epsilon.version}</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.eclipse.epsilon/org.eclipse.epsilon.ecl.engine -->
+		<dependency>
+			<groupId>org.eclipse.epsilon</groupId>
+			<artifactId>org.eclipse.epsilon.ecl.engine</artifactId>
+			<version>${epsilon.version}</version>
 		</dependency>
 
+
+		<!-- https://mvnrepository.com/artifact/com.opencsv/opencsv -->
 		<dependency>
 			<groupId>com.opencsv</groupId>
 			<artifactId>opencsv</artifactId>
-			<version>5.7.1</version>
+			<version>5.8</version>
 		</dependency>
+
 
 		<dependency>
 			<groupId>org.eclipse</groupId>
@@ -172,12 +179,6 @@
 			<groupId>org.eclipse.platform</groupId>
 			<artifactId>org.eclipse.swt.gtk.linux.x86_64</artifactId>
 			<version>3.122.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.eclipse.jgit</groupId>
-			<artifactId>org.eclipse.jgit</artifactId>
-			<version>6.4.0.202211300538-r</version>
 		</dependency>
 
 		<dependency>
@@ -193,35 +194,41 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.mongodb</groupId>
-			<artifactId>mongodb-driver-sync</artifactId>
-			<version>4.5.1</version>
-		</dependency>
-
-		<dependency>
-			<groupId>dev.morphia.morphia</groupId>
-			<artifactId>morphia-core</artifactId>
-			<version>2.2.6</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.auth0</groupId>
-			<artifactId>java-jwt</artifactId>
-			<version>3.18.2</version>
-		</dependency>
-		<dependency>
 			<groupId>io.github.cdimascio</groupId>
 			<artifactId>dotenv-java</artifactId>
 			<version>2.3.1</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
 		<dependency>
-			<groupId>org.apache.commons</groupId>
+			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>1.3.2</version>
+			<version>2.13.0</version>
 		</dependency>
 
 
+		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j -->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>2.19.0</version>
+			<type>pom</type>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/info.debatty/java-string-similarity -->
+		<dependency>
+			<groupId>info.debatty</groupId>
+			<artifactId>java-string-similarity</artifactId>
+			<version>2.0.0</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jgit/ -->
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit</artifactId>
+			<version>6.7.0.202309050840-r</version>
+		</dependency>
+
 	</dependencies>
+
 
 	<build>
 		<plugins>
