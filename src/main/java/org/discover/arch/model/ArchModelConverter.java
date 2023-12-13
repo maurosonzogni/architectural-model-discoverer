@@ -6,7 +6,7 @@ import org.config.Config;
 import org.eclipse.xtext.validation.Issue;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.osate.standalone.model.RawModelLoader;
+import org.osate.standalone.model.IRawModelLoader;
 import org.osate.standalone.model.LoadAADLModel;
 
 import java.io.File;
@@ -34,8 +34,6 @@ public class ArchModelConverter {
     public ArchModelConverter(Config configObj) {
         // set config
         this.configObj = configObj;
-
-        converterModelClassMap.put("aadl", LoadAADLModel.getInstance());
     }
 
    
@@ -53,9 +51,8 @@ public class ArchModelConverter {
 
 
     private Map<String, Object> convertModelsUsingClass(String pathFile, String outPathXMI, String id) throws Exception {
-        // String extension = SearchFileTraversal.getExtension(pathFile);
-        String extension = "aadl";
-        RawModelLoader modelLoader = (RawModelLoader) this.converterModelClassMap.get(extension);
+
+        IRawModelLoader modelLoader = (IRawModelLoader) LoadAADLModel.getInstance();
         return modelLoader.loadModel(pathFile, outPathXMI, id, this.configObj);
     }
 
@@ -168,10 +165,10 @@ public class ArchModelConverter {
         ReentrantLock lock = new ReentrantLock();
         lock.lock();
         try {
-            List<String> aadlFiles = (List<String>) dataOutput.get(RawModelLoader.MODEL_FILES_FOUND);
-            List<String> docFiles = (List<String>) dataOutput.get(RawModelLoader.DOC_FILES); // TODO: This is making a big impact in the generation of the json
+            List<String> aadlFiles = (List<String>) dataOutput.get(IRawModelLoader.MODEL_FILES_FOUND);
+            List<String> docFiles = (List<String>) dataOutput.get(IRawModelLoader.DOC_FILES); // TODO: This is making a big impact in the generation of the json
             this.dataModelFiles.addAll(aadlFiles);
-            List<OutputLoadedModelSchema> dataOutputConversion = (List<OutputLoadedModelSchema>) dataOutput.get(RawModelLoader.CONVERTING_OUTPUT);
+            List<OutputLoadedModelSchema> dataOutputConversion = (List<OutputLoadedModelSchema>) dataOutput.get(IRawModelLoader.CONVERTING_OUTPUT);
 
             dataOutputConversion.forEach((OutputLoadedModelSchema out) -> {
                 Map<String, Object> dataOutMap = out.toMap();

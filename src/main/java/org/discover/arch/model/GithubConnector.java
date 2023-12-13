@@ -1,5 +1,7 @@
 package org.discover.arch.model;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.config.Config;
 import org.eclipse.jgit.api.Git;
 
@@ -7,26 +9,22 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
+import org.utils.Utils;
 
+import lombok.NoArgsConstructor;
 
-public class GithubConnector implements ExternalConnector {
-    
-    private Config configObj;
+@NoArgsConstructor
+public class GithubConnector {
 
-    GithubConnector(Config configObj) {
-        this.configObj = configObj;
-    }
+    private final static Logger logger = LogManager.getLogger(GithubConnector.class);
 
-    @Override
-    public MetaData extractMetaData(String externalRepoURL) throws InvalidURLConnectorException {
+    private MetaData extractMetaData(String externalRepoURL) throws InvalidURLConnectorException {
         MetaData data = new MetaData();
-        if (isValidPath(externalRepoURL)) {
+        if (Utils.isValidPath(externalRepoURL)) {
             String[] parts = externalRepoURL.split("/");
             String name = parts[parts.length - 1];
             name = name.split("\\.")[0];
@@ -40,52 +38,52 @@ public class GithubConnector implements ExternalConnector {
         return data;
     }
 
-    @Override
-    public void loadResource(String externalRepoURL, String directoryPath) throws Exception {
+    public void loadResource(String externalRepoURL, String directoryPath, Config config) throws Exception {
+        
+        config.addPathToArchivesForSearching(directoryPath);
         MetaData metaData = this.extractMetaData(externalRepoURL);
         File clonedDirectory = Paths.get(directoryPath, metaData.name).toFile();
         Git git = null;
         try {
-            if (!this.isReadyForDownload(clonedDirectory.toString())) return;
-            System.out.println("CLONING REPOSITORY: " + metaData.downloadablePath);
+            if (!this.isReadyForDownload(clonedDirectory))
+                return;
+            
             this.deleteBeforeLoading(clonedDirectory.toString());
+            logger.info("Start cloning repository: " + metaData.downloadablePath);
+
             git = Git.cloneRepository()
                     .setURI(metaData.downloadablePath)
                     .setDirectory(clonedDirectory)
                     .call();
-            System.out.println("FINISH OF CLONING REPOSITORY: " + metaData.downloadablePath);
-            configObj.putInCache(externalRepoURL);
-            configObj.addMoreArchivesForSearching(directoryPath);
-        } catch (Exception error) {
-            System.out.println("Error cloning the repo from Github");
-            error.printStackTrace();
+            logger.info("End cloning repository: " + metaData.downloadablePath);
+
+            config.putInCache(externalRepoURL);
+            
+        } catch (Exception e) {
+            // if an error occours, remove directoryPath from Archives For Searching
+            config.removePathFromArchivesForSearching(directoryPath);
+            logger.error(e);
         } finally {
-            System.out.println("CLOSED THE GIT CONNECTION");
-            if (git != null) git.close();
+            if (git != null) {
+                git.close();
+                logger.info("Git connection closed");
+            }
         }
     }
 
-    @Override
-    public boolean isValidPath(String externalRepoURL) {
-        String regex = "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
-        Pattern patt = Pattern.compile(regex);
-        Matcher matcher = patt.matcher(externalRepoURL);
-        boolean isValidURL = matcher.matches();
-        boolean isGithubURL = externalRepoURL.contains("github.com");
-        return isValidURL && isGithubURL;
-    }
+    public boolean isReadyForDownload(File repositoryDir) {
 
-    @Override
-    public boolean isReadyForDownload(String repoPath) {
-        System.out.println("\t-Analysing if there are new commits on: " + repoPath);
-        File repoDir = new File(repoPath);
-        if (!repoDir.exists()) {
-            System.out.println("\t(New commits)");
+        logger.info("Analysing if there are new commits on: " + repositoryDir.toString());
+
+        if (!repositoryDir.exists()) {
+            logger.info("New commits found");
             return true;
         }
+
         Git git = null;
+
         try {
-            git = Git.open(repoDir);
+            git = Git.open(repositoryDir);
             git.fetch().call();
             ObjectId localHead = git.getRepository().resolve("HEAD");
             Collection<Ref> refs = git.lsRemote().setHeads(true).setTags(false).call();
@@ -97,25 +95,29 @@ public class GithubConnector implements ExternalConnector {
                     .map(Ref::getObjectId)
                     .findFirst()
                     .orElse(null);
-            if (localHead.equals(remoteHead)) {
-                System.out.println("\t(No new commits)");
+
+            if (localHead != null && localHead.equals(remoteHead)) {
+                logger.info("New commits not found");
                 return false;
-            } else {
-                System.out.println("\t(New commits)");
-                return true;
             }
+            logger.info("New commits found");
+            return true;
+
         } catch (IOException | GitAPIException e) {
-            System.out.println("\t(No new commits)");
+            logger.error(e);
             return false;
         } finally {
-            if (git != null) git.close();
+            if (git != null) {
+                git.close();
+                logger.info("Git connection closed");
+            }
         }
     }
 
-    @Override
     public void deleteBeforeLoading(String clonedDirectoryRepo) throws Exception {
         File file = new File(clonedDirectoryRepo);
-        if (!file.exists()) return;
+        if (!file.exists())
+            return;
         Config.deleteDirectory(file.toPath());
     }
 }

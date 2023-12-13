@@ -19,19 +19,19 @@ public class Main {
         try {
             Config config = new Config();
 
-            /*
-             * EcoreModelHandler ecoreModelHandler = new EcoreModelHandler(config);
-             * 
-             * EolRunner eolRunner = EolRunner.getInstance();
-             * 
-             * JavaQueryAADLModelInst javaQueryAADLModelInst =
-             * JavaQueryAADLModelInst.getInstance();
-             * 
-             * config.loadJSONFilesGeneratedByDiscoveringPhase();
-             * ecoreModelHandler.processModels(eolRunner, javaQueryAADLModelInst);
-             * 
-             * ecoreModelHandler.generateCSVFileFromProcessedModels("results");
-             */
+        
+            /*EcoreModelHandler ecoreModelHandler = new EcoreModelHandler(config);
+            
+            EolRunner eolRunner = EolRunner.getInstance();
+            
+            JavaQueryAADLModelInst javaQueryAADLModelInst =
+            JavaQueryAADLModelInst.getInstance();
+            
+            config.loadJSONFilesGeneratedByDiscoveringPhase();
+            ecoreModelHandler.processModels(eolRunner, javaQueryAADLModelInst);
+            
+            ecoreModelHandler.generateCSVFileFromProcessedModels("results");*/
+           
 
             EclConfig eclConfig = new EclConfig();
 
@@ -61,10 +61,16 @@ public class Main {
 
                 EgxRunner egxRunner = EgxRunner.getInstance();
 
+                long startTime = System.nanoTime();
+
                 egxRunner.run(egxConfig,
                         Utils.discoverModelFromPath(Paths.get(config.getRootPath(),
                                 config.getOutputFolder(), "xmi")
                                 .toString(), config.getModelExtension()));
+                long endTime = System.nanoTime();
+
+                logger.info("Egx runner execution time in seconds: "
+                        + ((endTime - startTime) / 1000000000) + " s");
             }
 
         } catch (Exception e) {

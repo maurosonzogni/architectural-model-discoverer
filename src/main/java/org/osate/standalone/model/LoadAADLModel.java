@@ -30,23 +30,23 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.util.*;
 
-public class LoadAADLModel implements RawModelLoader {
+public class LoadAADLModel implements IRawModelLoader {
     private static LoadAADLModel INSTANCE = null;
-    Injector injector;
+    Injector injector = new Aadl2StandaloneSetup().createInjectorAndDoEMFRegistration();;
     private final String PREDECLARED_PROPERTY_SET = Paths.get("aadl").toAbsolutePath().toString();
 
     private final static Logger logger = LogManager.getLogger(LoadAADLModel.class);
 
     private LoadAADLModel() {
-        this.injector = new Aadl2StandaloneSetup().createInjectorAndDoEMFRegistration();
-        Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put("aaxl2", new Aadl2ResourceFactoryImpl());
-        InstancePackage.eINSTANCE.eClass();
+
     }
 
     public static LoadAADLModel getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new LoadAADLModel();
-        }
+        if (INSTANCE != null)
+            return INSTANCE;
+        INSTANCE = new LoadAADLModel();
+        Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put("aaxl2", new Aadl2ResourceFactoryImpl());
+        InstancePackage.eINSTANCE.eClass();
         return INSTANCE;
     }
 

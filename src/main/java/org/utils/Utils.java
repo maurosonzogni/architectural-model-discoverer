@@ -9,6 +9,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.LogManager;
@@ -21,6 +23,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import com.opencsv.CSVWriter;
+
 /**
  * @author Mauro Sonzogni
  * 
@@ -54,13 +57,13 @@ public class Utils {
 
         Files.walk(Path.of(stringPath)).sorted().map(Path::toFile).forEach(
                 (File file) -> {
-                    
+
                     if (file.isFile()) {
                         String path = file.getPath();
                         String fileExtension = FilenameUtils.getExtension(path);
-                        if (!fileExtension.isEmpty() && modelExtension.contains(fileExtension) && ! path.contains(" ")) {
+                        if (!fileExtension.isEmpty() && modelExtension.contains(fileExtension) && !path.contains(" ")) {
 
-                                uris.add(path);
+                            uris.add(path);
                         }
 
                     }
@@ -102,8 +105,6 @@ public class Utils {
         return emfModel;
     }
 
-
-
     /**
      * Read configuration file from the specified location
      * 
@@ -112,7 +113,7 @@ public class Utils {
      */
     public static JSONObject readJSONFile(String path) throws Exception {
 
-        logger.debug("Utils@readJSONFile(String path)-> Reading file: "+ path);
+        logger.debug("Utils@readJSONFile(String path)-> Reading file: " + path);
         // read config file from config path
         InputStream inputStream = EclConfig.class.getResourceAsStream(path);
         if (inputStream == null) {
@@ -123,8 +124,7 @@ public class Utils {
         return configuration;
     }
 
-
-     /**
+    /**
      * Method that take in input a json array and return an array list
      * 
      * @param jsonArray
@@ -177,6 +177,22 @@ public class Utils {
             logger.error(error.getMessage());
         }
 
+    }
+
+    /**
+     * This method checks if an external repository URL is valid.
+     *
+     * @param externalRepoURL The URL of the external repository to be verified.
+     * @return true if the URL is valid and belongs to GitHub; otherwise, false.
+     */
+    public static boolean isValidPath(String externalRepoURL) {
+        // Define a regex pattern to validate the URL.
+        Pattern pattern = Pattern.compile("^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
+        // Create a matcher to compare the URL with the pattern.
+        Matcher matcher = pattern.matcher(externalRepoURL);
+        // Return the result of the validation: the URL must match the pattern and
+        // contain "github.com".
+        return matcher.matches() && externalRepoURL.contains("github.com");
     }
 
     /**

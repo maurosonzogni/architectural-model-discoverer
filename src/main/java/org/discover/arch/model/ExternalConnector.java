@@ -7,8 +7,6 @@ public interface ExternalConnector {
 
     void loadResource(String externalRepoURL, String directoryPath) throws Exception;
 
-    boolean isValidPath(String externalRepoURL);
-
     boolean isReadyForDownload(String path);
     
     void deleteBeforeLoading(String clonedDirectoryRepo) throws Exception;

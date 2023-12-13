@@ -44,7 +44,7 @@ public class Config {
 
     public Config() throws Exception {
 
-        logger.debug("Config@config -> Start configuration");
+        logger.debug("Start configuration");
 
         JSONObject config = Utils.readJSONFile(configPath);
 
@@ -72,7 +72,7 @@ public class Config {
         // set file names to avoid
         this.avoidFileNames = Utils.fromJSONArrayToArrayList(config.getJSONArray("avoidFileNames"));
 
-        logger.debug("Config@Config() -> End configuartion");
+        logger.debug("End configuartion");
 
         this.conversionLogs = new ArrayList<>();
         this.filesFound = new ArrayList<>();
@@ -98,10 +98,20 @@ public class Config {
      * 
      * @param path
      */
-    public void addMoreArchivesForSearching(String path) {
+    public void addPathToArchivesForSearching(String path) {
         if (!this.archivesForSearching.contains(path)) {
             this.archivesForSearching.add(path);
-            this.saveConfig();
+        }
+    }
+
+    /**
+     * Delete path for searching if exists
+     * 
+     * @param path
+     */
+    public void removePathFromArchivesForSearching(String path) {
+        if (this.archivesForSearching.contains(path)) {
+            this.archivesForSearching.remove(path);
         }
     }
 

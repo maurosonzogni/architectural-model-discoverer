@@ -16,14 +16,14 @@ public class Main {
             config = new Config();
 
         } catch (Exception e) {
-            logger.error("Main@main -> ERROR LOADING THE CONFIG FILE: " + e.getMessage());
+            logger.error("ERROR LOADING THE CONFIG FILE: " + e.getMessage());
             return;
         }
 
         try {
 
             if (!config.createFolderOutput()) {
-                logger.warn("Main@main -> STRUCTURE FOLDER NOT CREATED, PLEASE CHECK IF ALREADY EXISTS");
+                logger.warn("STRUCTURE FOLDER NOT CREATED, PLEASE CHECK IF ALREADY EXISTS");
                 return;
             }
 
@@ -32,12 +32,13 @@ public class Main {
 
             ResourcesProviderAnalyzer resourcesProviderAnalyzer = new ResourcesProviderAnalyzer(config);
             SearchFileTraversal fileDiscover = new SearchFileTraversal(config)
-                    .setSearchPaths(resourcesProviderAnalyzer.getConfigObj().getArchivesForSearching());
+                   .setSearchPaths(resourcesProviderAnalyzer.validateFilePaths(config));
             ArchModelConverter archModelConverter = new ArchModelConverter(config);
 
             fileDiscover.analyseModels(archModelConverter);
         } catch (Exception e) {
-            logger.error("Main@main -> ERROR: " + e.getMessage());
+            e.printStackTrace();
+            logger.error("ERROR: " + e.getMessage());
         }
     }
 

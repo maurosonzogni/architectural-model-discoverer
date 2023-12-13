@@ -2,10 +2,12 @@ package org.discover.arch.model;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.text.DecimalFormat;
 import java.util.*;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.config.Config;
+import org.utils.Utils;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -14,62 +16,58 @@ import lombok.Setter;
 @Setter
 public class ResourcesProviderAnalyzer {
 
-    private Config configObj;
-    Map<String, ExternalConnector> externalConnectorMap = new HashMap<>();
+    private GithubConnector githubConnector = new GithubConnector();
 
-    public ResourcesProviderAnalyzer(Config configObj) throws Exception {
-        this.configObj = configObj;
-        this.externalConnectorMap.put("github", new GithubConnector(this.configObj));
-        this.validateExternalPaths();
-        boolean validationFiles = this.validateFilePaths();
-        if (!validationFiles)
-            throw new Exception("THERE IS NOT VALID PATH IN THE LIST PROVIDED, PLEASE VERIFY YOUR CONFIGURATION");
-        this.configObj.persistCacheInDisk();
+    private final static Logger logger = LogManager.getLogger(ResourcesProviderAnalyzer.class);
+
+    public ResourcesProviderAnalyzer(Config config) {
+
+        this.validateExternalPaths(config);
+
+        config.persistCacheInDisk();
     }
 
-    private boolean validateFilePaths() {
+    public List<String> validateFilePaths(Config config) {
         List<String> validFilesPaths = new ArrayList<>();
-        for (String p : this.configObj.getArchivesForSearching()) {
+        for (String p : config.getArchivesForSearching()) {
             File file = new File(p);
             if (file.exists())
                 validFilesPaths.add(p);
         }
-        this.configObj.setArchivesForSearching(validFilesPaths);
-        return true;
+        if (validFilesPaths.size() == 0) {
+            logger.warn("THERE IS NOT VALID PATH IN THE LIST PROVIDED, PLEASE VERIFY YOUR CONFIGURATION");
+        }
+        return validFilesPaths;
     }
 
-    private void validateExternalPaths() {
-        System.out.println("***********************************************************************************************");
-        System.out.println("ANALYZING THE EXTERNAL PATHS THIS MAY TAKE A BIT LONGER, DEPENDS OF THE CACHE TIME CONFIGURATION");
-        int delayCache = this.configObj.timeCacheForPollingFromExternalResources;
+    private void validateExternalPaths(Config config) {
+        logger.info("ANALYZING THE EXTERNAL PATHS THIS MAY TAKE A BIT LONGER, DEPENDS OF THE CACHE TIME CONFIGURATION");
+        int delayCache = config.getTimeCacheForPollingFromExternalResources();
+
         long startTime = System.nanoTime();
 
-        for (String p : this.configObj.getExternalResources()) {
-            Map.Entry<String, ExternalConnector> entrySet = this.externalConnectorMap.entrySet()
-                    .stream().filter((Map.Entry<String, ExternalConnector> entry) -> entry.getValue().isValidPath(p)).findAny().orElse(null);
-            if (entrySet == null)
-                System.out.println("Not found connector to external result : " + p);
+        for (String path : config.getExternalResources()) {
+            if (!Utils.isValidPath(path))
+                logger.warn("Not found connector to external result : " + path);
             else {
-                ExternalConnector connector = entrySet.getValue();
-                String directoryPath = Paths.get(this.configObj.getRootPath(), entrySet.getKey()).toAbsolutePath().toString();
-                // Layer of validation that checks for the  config expiration times
-                if (this.configObj.isInCache(p, delayCache)) {
+                String directoryPath = Paths.get(config.getRootPath(), "github").toAbsolutePath().toString();
+                // Layer of validation that checks for the config expiration times
+                if (config.isInCache(path, delayCache)) {
                     continue;
                 }
                 try {
-                    connector.loadResource(p, directoryPath);
+                    githubConnector.loadResource(path, directoryPath, config);
                 } catch (Exception e) {
-                    System.out.println("Error analysing the external resource: " + p);
+                    logger.error("Error analysing the external resource: " + path);
                     e.printStackTrace();
                 }
             }
 
         }
         long endTime = System.nanoTime();
-        double elapsedTime = (double) (endTime - startTime) / 1000000000;
-        System.out.println("\033[0;32m" + "ELAPSED TIME: " + new DecimalFormat("0.000").format(elapsedTime) + "s" + "\033[0m");
-        System.out.println("EXTERNAL PATHS SUCCESSFULLY SYNCHRONIZED TO THE PROJECT");
-        System.out.println("***********************************************************************************************");
+        logger.info("Validation external path execution time in seconds: "
+                + ((endTime - startTime) / 1000000000) + " s");
+
     }
 
 }
