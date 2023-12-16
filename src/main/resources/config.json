@@ -1,15 +1,41 @@
 {
   "rootPath": "models",
-
   "ecoreFolder": "ecore",
-
-  "extensionsForSearching": ["aadl"],
-
-  "archivesForSearching": ["models/raw-models"],
-
+  "extensionsForSearching": [
+    "aadl"
+  ],
+  "archivesForSearching": [
+    "models/raw-models",
+    "models/github"
+  ],
   "outputFolder": "output-processing",
-  
-  "modelExtension": ["xml", "xmi", "ecore", "aaxl2"],
+  "modelExtension": [
+    "xml",
+    "xmi",
+    "ecore",
+    "aaxl2"
+  ],
+  "validNameMinimumLength": 2,
+  "common_words_to_exclude": [
+    "_",
+    "this",
+    "instance",
+    "impl",
+    "imp",
+    "sensor",
+    "subsystem",
+    "system",
+    "sys",
+    "sub",
+    "single",
+    "dual",
+    "integration",
+    "standard",
+    "with",
+    "functional",
+    "devices",
+    "hardware"
+  ],
 
   
   "avoidFileNames": [

@@ -35,6 +35,9 @@ public class Config {
     private List<String> filesFound;
     private Map<String, Object> reports;
     private Map<String, Date> cache;
+    private List<String> common_words_to_exclude;
+    private int validNameMinimumLength;
+
     public int timeCacheForDiscoveringSearchOverFilesInSeconds;
     public int timeCacheForPollingFromExternalResources;
 
@@ -60,8 +63,13 @@ public class Config {
         this.timeCacheForDiscoveringSearchOverFilesInSeconds = config.getInt("timeCacheForDiscoveringSearchOverFilesInSeconds");
         // set cache for polling
         this.timeCacheForPollingFromExternalResources = config.getInt("timeCacheForPollingFromExternalResources");
-                // set file names to avoid
+        // set file names to avoid
         this.modelExtension= Utils.fromJSONArrayToArrayList(config.getJSONArray("modelExtension"));
+        
+        // Set minimum length to avoid to convert spourious model
+        this.validNameMinimumLength = config.getInt("validNameMinimumLength");
+        // Set common words to exclude
+        this.common_words_to_exclude = Utils.fromJSONArrayToArrayList(config.getJSONArray("common_words_to_exclude"));
 
         // set archives for searching
         this.archivesForSearching = Utils.fromJSONArrayToArrayList(config.getJSONArray("archivesForSearching"));

@@ -2,6 +2,8 @@ package org.discover.arch.model;
 
 import com.opencsv.CSVWriter;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.config.Config;
 import org.eclipse.xtext.validation.Issue;
 import org.json.JSONArray;
@@ -30,6 +32,8 @@ public class ArchModelConverter {
     List<OutputLoadedModelSchema> conversionOutput = new ArrayList<>();
     
     Config configObj;
+
+    private final static Logger logger = LogManager.getLogger(ArchModelConverter.class);
 
     public ArchModelConverter(Config configObj) {
         // set config

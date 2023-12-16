@@ -196,6 +196,40 @@ public class Utils {
     }
 
     /**
+     * This method replaces specified words in a given input string with a
+     * replacement string.
+     * The replacement is case-insensitive using regular expressions.
+     *
+     * @param input The original input string.
+     * 
+     * @param wordsToRemove An array of words to be removed from the input string.
+     * 
+     * @param replacement The string to replace the removed words with.
+     * 
+     * @return The modified input string after all replacements.
+     *
+     * TODO: Evaluate whether to pass a minimum length, and if so, add a condition
+     * in the while loop.
+     */
+    public static String replaceStringIgnoreCase(String input, List<String> wordsToRemove, String replacement) {
+        // Initialize the index for iterating through the array of words to remove.
+        int i = 0;
+
+        // Iterate through the array of words to remove.
+        while (i < wordsToRemove.size()) {
+            // Use a case-insensitive regular expression to replace all occurrences of the
+            // current word with the replacement.
+            input = input.replaceAll("(?i)" + wordsToRemove.get(i), replacement);
+
+            // Move to the next word in the array.
+            i++;
+        }
+
+        // Return the modified input string after all replacements.
+        return input;
+    }
+
+    /**
      * This method take in input a 2dArray and print it in console
      * 
      * @param matrix
