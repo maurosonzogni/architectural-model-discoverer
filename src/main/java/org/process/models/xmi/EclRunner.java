@@ -122,14 +122,13 @@ public class EclRunner {
                     // initialize csv headers with moldels name
                     if (i == 0) {
                         // on first loop add all model names
-                        String modelName = (String) eclModule.getContext().getFrameStack().get("secondModelName")
-                                .getValue();
+                        String modelName = secondModel.getModelFileUri().lastSegment();
                         headers.add(modelName);
                     }
 
                     // in this way we initialize all the csv row with model name
                     if (j == 0) {
-                        csvRow.add((String) eclModule.getContext().getFrameStack().get("firstModelName").getValue());
+                        csvRow.add(firstModel.getModelFileUri().lastSegment());
                     }
                     csvRow.add((matrix[i][j]).toString());
 
